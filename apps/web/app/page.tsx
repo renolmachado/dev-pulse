@@ -1,7 +1,8 @@
 import Image, { type ImageProps } from 'next/image';
 import { Button } from '@repo/ui/button';
+import { HealthChecker } from '@repo/ui/healthChecker';
+
 import styles from './page.module.css';
-import { HealthChecker } from '../../../packages/ui/src/healthChecker';
 
 type Props = Omit<ImageProps, 'src'> & {
   srcLight: string;

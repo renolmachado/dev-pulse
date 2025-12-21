@@ -1,7 +1,7 @@
 'use client';
 import { useHealthChecker } from './useHealthChecker';
 
-const HealthChecker = () => {
+export const HealthChecker = () => {
   const { healthCheck, health, error } = useHealthChecker();
 
   return (
@@ -12,5 +12,3 @@ const HealthChecker = () => {
     </>
   );
 };
-
-export default HealthChecker;
