@@ -11,7 +11,7 @@ export const useHealthChecker = () => {
       }
 
       const health = await fetch(process.env.NEXT_PUBLIC_API_URL);
-      setHealth(await health.text());
+      setHealth(await health.json());
       setError('');
     } catch (error) {
       setError(JSON.stringify(error));

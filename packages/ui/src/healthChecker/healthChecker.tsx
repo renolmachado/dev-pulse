@@ -7,8 +7,8 @@ export const HealthChecker = () => {
   return (
     <>
       <button onClick={healthCheck}>Health Check</button>
-      <p>Health: {health}</p>
-      <p>Error: {error}</p>
+      <p>Health: {JSON.stringify(health)}</p>
+      <p>Error: {JSON.stringify(error)}</p>
     </>
   );
 };

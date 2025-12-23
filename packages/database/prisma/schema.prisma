@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Article {
+  id          String   @id @default(cuid())
+  author      String?
+  content     String?
+  description String?
+  publishedAt DateTime
+  title       String?
+  url         String   @unique
+  urlToImage  String?
+
+
+  
+  // To track the microservice pipeline
+  status      ProcessingStatus @default(PENDING)
+  summary     String?  @db.Text
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum ProcessingStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
