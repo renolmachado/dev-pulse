@@ -1,10 +1,9 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import type { Article } from '@repo/database';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import type { Prisma } from '@repo/database/generated/prisma/client';
-
-import { PrismaService } from '../utils/prisma.service';
-
 interface NewsAPIArticle {
   author: string | null;
   content: string | null;
@@ -25,14 +24,15 @@ interface NewsAPIResponse {
 export class NewsService {
   constructor(
     private readonly httpService: HttpService,
-    private readonly prismaService: PrismaService,
+    @InjectQueue('news-processing') private newsQueue: Queue,
   ) {}
 
-  async getNews(): Promise<Article[]> {
+  @Cron(CronExpression.EVERY_HOUR)
+  async fetchNews() {
     try {
+      console.log('Fetching news...');
+
       const params = new URLSearchParams();
-      // params.append('from', '2025-12-21');
-      // params.append('to', '2025-12-21');
       params.append('sortBy', 'publishedAt');
       params.append('apiKey', process.env.NEWS_API_API_KEY ?? '');
       params.append('q', ',');
@@ -40,8 +40,6 @@ export class NewsService {
       params.append('language', 'es');
       params.append('language', 'pt');
       params.append('page', '2');
-
-      // params.append('category', 'business');
 
       const response = await this.httpService.axiosRef.get<NewsAPIResponse>(
         `https://newsapi.org/v2/everything?${params.toString()}`,
@@ -58,19 +56,9 @@ export class NewsService {
           urlToImage: article.urlToImage,
         }));
 
-      await this.prismaService.client.article.createMany({
-        data: articlesData,
-        skipDuplicates: true,
-      });
-
-      const urls = articlesData.map((a) => a.url);
-
-      return this.prismaService.client.article.findMany({
-        where: {
-          url: {
-            in: urls,
-          },
-        },
+      await this.newsQueue.add('process-news', articlesData, {
+        attempts: 3,
+        backoff: 5000,
       });
     } catch (error) {
       // TODO Send error to Sentry
