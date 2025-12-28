@@ -1,5 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
+import Redis from 'ioredis';
 import { WorkerService } from './worker.service';
 import { NewsProcessorModule } from './modules/news-processor/news-processor.module';
 
@@ -7,10 +11,9 @@ import { NewsProcessorModule } from './modules/news-processor/news-processor.mod
   imports: [
     NewsProcessorModule,
     BullModule.forRoot({
-      connection: {
-        host: process.env.REDIS_HOST ?? 'localhost',
-        port: parseInt(process.env.REDIS_PORT ?? '6379'),
-      },
+      connection: new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+        maxRetriesPerRequest: null,
+      }),
     }),
 
     BullModule.registerQueue({

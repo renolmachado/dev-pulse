@@ -50,6 +50,9 @@ importers:
       bullmq:
         specifier: ^5.66.2
         version: 5.66.2
+      ioredis:
+        specifier: ^5.8.2
+        version: 5.8.2
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -193,6 +196,9 @@ importers:
       groq-sdk:
         specifier: ^0.37.0
         version: 0.37.0
+      ioredis:
+        specifier: ^5.8.2
+        version: 5.8.2
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
