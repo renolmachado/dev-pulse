@@ -25,6 +25,28 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## Environment Variables
+
+The worker service requires the following environment variables:
+
+```bash
+# Groq API Configuration (Required for AI features)
+GROQ_API_KEY=your_groq_api_key_here
+
+# Database Configuration
+DATABASE_URL=postgresql://user:password@localhost:5432/devpulse
+
+# Redis Configuration (for BullMQ)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+```
+
+**Getting your Groq API Key:**
+1. Visit [https://console.groq.com/keys](https://console.groq.com/keys)
+2. Sign up or log in
+3. Create a new API key
+4. Set it as an environment variable or in your `.env` file
+
 ## Project setup
 
 ```bash
@@ -47,8 +69,17 @@ $ pnpm run start:prod
 ## Run tests
 
 ```bash
-# unit tests
+# all tests (unit + integration)
 $ pnpm run test
+
+# unit tests only (fast, no external dependencies)
+$ pnpm run test:unit
+
+# integration tests only (requires GROQ_API_KEY)
+$ pnpm run test:integration
+
+# watch mode
+$ pnpm run test:watch
 
 # e2e tests
 $ pnpm run test:e2e
@@ -56,6 +87,17 @@ $ pnpm run test:e2e
 # test coverage
 $ pnpm run test:cov
 ```
+
+### About Integration Tests
+
+Integration tests make real API calls to Groq and fetch real web content. They require:
+- `GROQ_API_KEY` environment variable set
+- Active internet connection
+- May consume API credits (minimal usage)
+
+If `GROQ_API_KEY` is not set, integration tests will be automatically skipped.
+
+See [src/modules/utils/tests/README.md](src/modules/utils/tests/README.md) for detailed testing documentation.
 
 ## Deployment
 

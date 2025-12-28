@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
@@ -22,6 +22,8 @@ interface NewsAPIResponse {
 
 @Injectable()
 export class NewsService {
+  private readonly logger = new Logger(NewsService.name);
+
   constructor(
     private readonly httpService: HttpService,
     @InjectQueue('news-processing') private newsQueue: Queue,
@@ -30,7 +32,7 @@ export class NewsService {
   @Cron(CronExpression.EVERY_HOUR)
   async fetchNews() {
     try {
-      console.log('Fetching news...');
+      this.logger.log('Fetching news...');
 
       const params = new URLSearchParams();
       params.append('sortBy', 'publishedAt');
@@ -62,7 +64,7 @@ export class NewsService {
       });
     } catch (error) {
       // TODO Send error to Sentry
-      console.error(error);
+      this.logger.error(error);
       throw error;
     }
   }

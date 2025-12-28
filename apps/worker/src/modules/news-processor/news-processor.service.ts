@@ -1,15 +1,58 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Article } from '@repo/database';
 
 import { AiService } from '../utils/ai.service';
 import { PrismaService } from '../utils/prisma.service';
+import { ProcessingStatus } from '@repo/database/generated/prisma/enums';
 
 @Injectable()
 export class NewsProcessorService {
+  private readonly logger = new Logger(NewsProcessorService.name);
+
   constructor(
     private readonly aiService: AiService,
     private readonly prismaService: PrismaService,
   ) {}
 
-  public async processNews(_articles: Article[]): Promise<void> {}
+  public async processNews(articles: Article[]): Promise<void> {
+    const articlesInDatabase = await this.prismaService.client.article.findMany(
+      {
+        where: {
+          url: {
+            in: articles.map((article) => article.url ?? ''),
+          },
+        },
+      },
+    );
+
+    const newArticles = articles.filter(
+      (article) => !articlesInDatabase.some((a) => a.url === article.url),
+    );
+
+    const articlesToSave: Article[] = [];
+    for (const article of newArticles) {
+      await this.summarizeArticle(article, articlesToSave);
+    }
+
+    await this.prismaService.client.article.createMany({
+      data: articlesToSave,
+    });
+  }
+
+  private async summarizeArticle(article: Article, articlesToSave: Article[]) {
+    try {
+      const summary = await this.aiService.generateSummary(article);
+
+      articlesToSave.push({
+        ...article,
+        summary: summary ?? null,
+        status: summary ? ProcessingStatus.COMPLETED : ProcessingStatus.FAILED,
+      });
+    } catch (error) {
+      this.logger.error(
+        `Error generating summary for article ${article.url}:`,
+        error,
+      );
+    }
+  }
 }
