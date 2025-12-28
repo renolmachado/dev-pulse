@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AiService } from '../ai.service';
-import { Article } from '@repo/database';
-import { ProcessingStatus } from '@repo/database/generated/prisma/enums';
+import { Article, ProcessingStatus } from '@repo/database';
 
 // Mock Groq SDK
 jest.mock('groq-sdk');

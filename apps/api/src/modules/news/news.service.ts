@@ -3,7 +3,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import type { Prisma } from '@repo/database/generated/prisma/client';
+import type { Prisma } from '@repo/database';
+
 interface NewsAPIArticle {
   author: string | null;
   content: string | null;

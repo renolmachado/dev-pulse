@@ -2,8 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NewsProcessorService } from './news-processor.service';
 import { AiService } from '../utils/ai.service';
 import { PrismaService } from '../utils/prisma.service';
-import { ProcessingStatus } from '@repo/database/generated/prisma/enums';
-import { Article } from '@repo/database';
+import { ProcessingStatus, Article } from '@repo/database';
 
 describe('NewsProcessorService', () => {
   let service: NewsProcessorService;

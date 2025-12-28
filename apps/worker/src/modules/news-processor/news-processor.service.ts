@@ -1,9 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Article } from '@repo/database';
+import { Article, ProcessingStatus } from '@repo/database';
 
 import { AiService } from '../utils/ai.service';
 import { PrismaService } from '../utils/prisma.service';
-import { ProcessingStatus } from '@repo/database/generated/prisma/enums';
 
 @Injectable()
 export class NewsProcessorService {
