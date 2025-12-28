@@ -186,3 +186,4 @@ REDIS_PORT=6379
 3. ✅ Watch your integration tests run with real API calls! 🚀
 
 Your tests should now automatically pick up the `GROQ_API_KEY` from your `.env` file!
+
