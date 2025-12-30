@@ -28,6 +28,7 @@
     "@nestjs/schedule": "^6.1.0",
     "@prisma/client": "^7.2.0",
     "@repo/database": "workspace:*",
+    "@repo/health-check": "workspace:*",
     "axios": "^1.13.2",
     "bullmq": "^5.66.2",
     "ioredis": "^5.8.2",

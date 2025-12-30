@@ -10,7 +10,7 @@ export const useHealthChecker = () => {
         throw new Error('NEXT_PUBLIC_API_URL is not set');
       }
 
-      const health = await fetch(process.env.NEXT_PUBLIC_API_URL);
+      const health = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/health-check`);
       setHealth(await health.json());
       setError('');
     } catch (error) {

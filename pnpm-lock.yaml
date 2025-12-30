@@ -44,6 +44,9 @@ importers:
       '@repo/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@repo/health-check':
+        specifier: workspace:*
+        version: link:../../packages/health-check
       axios:
         specifier: ^1.13.2
         version: 1.13.2
@@ -187,6 +190,9 @@ importers:
       '@repo/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@repo/health-check':
+        specifier: workspace:*
+        version: link:../../packages/health-check
       bullmq:
         specifier: ^5.66.2
         version: 5.66.2
@@ -356,6 +362,21 @@ importers:
         version: 5.9.2
       typescript-eslint:
         specifier: ^8.49.0
+        version: 8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.2)
+
+  packages/health-check:
+    devDependencies:
+      '@nestjs/common':
+        specifier: ^11.0.1
+        version: 11.1.9(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@types/node':
+        specifier: ^22.10.7
+        version: 22.19.3
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.2
+      typescript-eslint:
+        specifier: ^8.20.0
         version: 8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.2)
 
   packages/typescript-config: {}
