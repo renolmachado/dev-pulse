@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import Redis from 'ioredis';
+import { HealthCheckModule } from '@repo/health-check';
 import { WorkerService } from './worker.service';
 import { NewsProcessorModule } from './modules/news-processor/news-processor.module';
 
@@ -19,7 +17,8 @@ import { NewsProcessorModule } from './modules/news-processor/news-processor.mod
     BullModule.registerQueue({
       name: 'news-processing',
     }),
+    HealthCheckModule,
   ],
   providers: [WorkerService],
 })
-export class WorkerModule {}
+export class AppModule {}

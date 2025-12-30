@@ -74,7 +74,6 @@ export class AiService {
       const contentParts = [
         article.title ? `Title: ${article.title}` : '',
         article.description ? `Description: ${article.description}` : '',
-        article.content ? `Preview: ${article.content}` : '',
         fetchedContent ? `Full Content: ${fetchedContent}` : '',
       ].filter((part) => part.length > 0);
 
@@ -112,7 +111,6 @@ export class AiService {
         `Error generating summary for article ${article.url}:`,
         error,
       );
-      return 'Error generating summary.';
     }
   }
 }

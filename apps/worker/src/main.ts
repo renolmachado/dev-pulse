@@ -1,9 +1,15 @@
 import { NestFactory } from '@nestjs/core';
-import { WorkerModule } from './app.module';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
-  await NestFactory.createApplicationContext(WorkerModule);
+  const app = await NestFactory.create(AppModule);
 
+  app.enableCors({
+    origin: [/^http:\/\/localhost:(.*)/],
+    methods: ['GET'],
+  });
+
+  await app.listen(process.env.PORT ?? 8002);
   console.log('Worker started');
 }
 bootstrap();

@@ -2,10 +2,18 @@
   "name": "@repo/database",
   "version": "0.0.0",
   "private": true,
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    }
+  },
   "scripts": {
     "postinstall": "node -e \"process.env.VERCEL !== '1' && require('child_process').execSync('prisma generate', {stdio: 'inherit'})\"",
+    "build": "tsc -p tsconfig.json",
+    "dev": "pnpm run build --watch",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
