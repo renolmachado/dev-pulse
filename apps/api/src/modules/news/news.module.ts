@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
 import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { BullModule } from '@nestjs/bullmq';
@@ -22,7 +19,6 @@ import { UtilsModule } from '../utils/utils.module';
       name: 'news-processing',
     }),
   ],
-  controllers: [],
   providers: [NewsService],
 })
 export class NewsModule {}
