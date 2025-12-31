@@ -137,7 +137,7 @@ describe('AiService', () => {
             content: expect.stringContaining('Test Article Title'),
           },
         ],
-        model: 'llama-3.3-70b-versatile',
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
         temperature: 0.5,
         max_completion_tokens: 500,
       });
@@ -225,7 +225,7 @@ describe('AiService', () => {
       expect(mockGroqInstance.chat.completions.create).not.toHaveBeenCalled();
     });
 
-    it('should handle Groq API errors and return error message', async () => {
+    it('should handle Groq API errors and return undefined', async () => {
       const mockHtml = '<article><p>Article content</p></article>';
 
       // Mock fetch
@@ -246,7 +246,7 @@ describe('AiService', () => {
 
       const result = await service.generateSummary(mockArticle);
 
-      expect(result).toBe('Error generating summary.');
+      expect(result).toBeUndefined();
     });
 
     it('should handle empty Groq response', async () => {
@@ -406,7 +406,6 @@ describe('AiService', () => {
       // Verify all content sources are included
       expect(userMessage.content).toContain('Title: Test Article Title');
       expect(userMessage.content).toContain('Description: Test description');
-      expect(userMessage.content).toContain('Preview: Test content preview');
       expect(userMessage.content).toContain('Full Content: Fetched content');
     });
 

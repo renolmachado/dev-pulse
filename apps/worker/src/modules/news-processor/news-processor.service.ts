@@ -31,6 +31,8 @@ export class NewsProcessorService {
     const articlesToSave: Article[] = [];
     for (const article of newArticles) {
       await this.summarizeArticle(article, articlesToSave);
+      // sleep for 5 second to avoid rate limiting
+      await new Promise((resolve) => setTimeout(resolve, 5000));
     }
 
     await this.prismaService.client.article.createMany({

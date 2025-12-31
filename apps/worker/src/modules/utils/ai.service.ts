@@ -62,6 +62,20 @@ export class AiService {
     }
   }
 
+  private estimateTokens(text: string): number {
+    return Math.ceil(text.length / 4);
+  }
+
+  private truncateToTokenLimit(content: string, maxTokens: number): string {
+    const estimatedTokens = this.estimateTokens(content);
+    if (estimatedTokens <= maxTokens) {
+      return content;
+    }
+
+    const maxChars = maxTokens * 4;
+    return content.substring(0, maxChars) + '...';
+  }
+
   /**
    * Generates a summary of an article using AI
    */
@@ -70,11 +84,31 @@ export class AiService {
       // Fetch the full article content from the URL
       const fetchedContent = await this.fetchArticleContent(article.url);
 
-      // Combine available information
+      // Reserve tokens for system prompt, user prompt template, and response
+      // System prompt + template overhead: ~100 tokens
+      // Response: 500 tokens (max_completion_tokens)
+      // Safety margin: 100 tokens
+      const OVERHEAD_TOKENS = 700;
+      const MAX_INPUT_TOKENS = 10000 - OVERHEAD_TOKENS;
+
+      const title = article.title ? `Title: ${article.title}` : '';
+      const description = article.description
+        ? `Description: ${article.description}`
+        : '';
+
+      const titleTokens = this.estimateTokens(title);
+      const descriptionTokens = this.estimateTokens(description);
+      const remainingTokens =
+        MAX_INPUT_TOKENS - titleTokens - descriptionTokens;
+
+      const truncatedContent = fetchedContent
+        ? this.truncateToTokenLimit(fetchedContent, remainingTokens - 20)
+        : '';
+
       const contentParts = [
-        article.title ? `Title: ${article.title}` : '',
-        article.description ? `Description: ${article.description}` : '',
-        fetchedContent ? `Full Content: ${fetchedContent}` : '',
+        title,
+        description,
+        truncatedContent ? `Full Content: ${truncatedContent}` : '',
       ].filter((part) => part.length > 0);
 
       if (contentParts.length === 0) {
@@ -84,7 +118,11 @@ export class AiService {
 
       const contentToSummarize = contentParts.join('\n\n');
 
-      // Generate summary using Groq
+      const finalTokenCount = this.estimateTokens(contentToSummarize);
+      this.logger.debug(
+        `Content tokens for ${article.url}: ~${finalTokenCount} tokens`,
+      );
+
       const completion = await this.groq.chat.completions.create({
         messages: [
           {
@@ -97,7 +135,7 @@ export class AiService {
             content: `Please summarize the following article:\n\n${contentToSummarize}`,
           },
         ],
-        model: 'llama-3.3-70b-versatile',
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
         temperature: 0.5,
         max_completion_tokens: 500,
       });
