@@ -1,5 +1,5 @@
 import { fetchArticleByTitle } from '@/lib/api';
-import { Clock, User, ExternalLink, ArrowLeft } from 'lucide-react';
+import { Clock, User, ExternalLink, ArrowLeft, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -97,7 +97,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           {article.summary && (
             <Card className="mb-6 border-l-4 border-l-primary bg-primary/5">
               <CardContent className="p-4">
-                <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-primary">Summary</h2>
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">Summary</h2>
+                  <div className="flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+                    <Sparkles className="h-3.5 w-3.5" />
+                    <span>AI Generated</span>
+                  </div>
+                </div>
                 <p className="text-base leading-relaxed text-foreground">{article.summary}</p>
               </CardContent>
             </Card>

@@ -1,4 +1,4 @@
-import { ArticleCard } from '@/components/article-card';
+import { ArticleCard } from '@/components/article-card/article-card';
 import { fetchArticles } from '@/lib/api';
 
 export default async function Home() {

@@ -1,4 +1,4 @@
-import { ArticleCardSkeleton } from '@/components/article-card-skeleton';
+import { ArticleCardSkeleton } from '@/components/article-card/article-card-skeleton';
 
 export default function Loading() {
   return (

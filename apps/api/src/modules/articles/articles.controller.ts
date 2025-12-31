@@ -29,9 +29,10 @@ export class ArticlesController {
   async getArticleByTitle(@Param('title') title: string): Promise<Article> {
     const article = await this.articlesService.getArticleByTitle(title);
 
-    console.log(JSON.stringify(article, null, 2), 'article', title);
     if (article === null) {
-      throw new NotFoundException(`Article with title "${decodeURIComponent(title)}" not found`);
+      throw new NotFoundException(
+        `Article with title "${decodeURIComponent(title)}" not found`,
+      );
     }
 
     return article;
@@ -41,7 +42,6 @@ export class ArticlesController {
   async getArticleById(@Param('id') id: string): Promise<Article> {
     const article = await this.articlesService.getArticleById(id);
 
-    console.log(JSON.stringify(article, null, 2), 'article', id);
     if (article === null) {
       throw new NotFoundException(`Article with ID ${id} not found`);
     }

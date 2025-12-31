@@ -1,8 +1,9 @@
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Clock, User } from 'lucide-react';
+import { Clock, User, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Article } from '@/types/article';
+import LinkIcon from '../link-icon/link-icon';
 
 interface ArticleCardProps {
   article: Article;
@@ -41,22 +42,43 @@ export function ArticleCard({ article }: ArticleCardProps) {
         <CardContent className="p-4">
           <h2 className="mb-3 line-clamp-3 text-lg font-semibold leading-tight text-foreground">{article.title || 'Untitled'}</h2>
 
-          {(article.summary || article.description) && <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">{article.summary || article.description}</p>}
+          {/* AI-Generated Summary */}
+          {article.summary && (
+            <div className="mb-3">
+              <div className="mb-1.5 flex items-center gap-1.5">
+                <Sparkles className="h-3 w-3 text-primary" />
+                <span className="text-xs font-medium text-primary">AI Summary</span>
+              </div>
+              <p className="text-sm leading-relaxed text-foreground">{article.summary}</p>
+            </div>
+          )}
+
+          {/* Original Description */}
+          {article.description && (
+            <div>
+              {article.summary && <p className="mb-1 text-xs font-medium text-muted-foreground">Original Description</p>}
+              <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">{article.description}</p>
+            </div>
+          )}
         </CardContent>
 
         <CardFooter className="flex items-center justify-between border-t px-4 py-3 text-xs text-muted-foreground">
-          {article.author && (
-            <div className="flex items-center gap-1.5 overflow-hidden">
-              <User className="h-3.5 w-3.5 flex-shrink-0" />
-              <span className="truncate font-medium">{article.author}</span>
+          <div className="flex items-center gap-3">
+            {article.author && (
+              <div className="flex items-center gap-1.5 overflow-hidden">
+                <User className="h-3.5 w-3.5 flex-shrink-0" />
+                <span className="truncate font-medium">{article.author}</span>
+              </div>
+            )}
+            <div className="flex items-center gap-1.5 whitespace-nowrap">
+              <Clock className="h-3.5 w-3.5" />
+              <time dateTime={article.publishedAt}>
+                {formattedDate} • {formattedTime}
+              </time>
             </div>
-          )}
-          <div className="flex items-center gap-1.5 whitespace-nowrap">
-            <Clock className="h-3.5 w-3.5" />
-            <time dateTime={article.publishedAt}>
-              {formattedDate} • {formattedTime}
-            </time>
           </div>
+
+          <LinkIcon url={article.url} />
         </CardFooter>
       </Card>
     </Link>
