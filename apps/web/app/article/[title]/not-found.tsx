@@ -21,7 +21,7 @@ export default function NotFound() {
           <FileQuestion className="mb-4 h-16 w-16 text-muted-foreground" />
           <h1 className="mb-2 text-3xl font-bold text-foreground">Article Not Found</h1>
           <p className="mb-6 text-lg text-muted-foreground">
-            The article you're looking for doesn't exist or has been removed.
+            The article you&apos;re looking for doesn&apos;t exist or has been removed.
           </p>
           <Link
             href="/"

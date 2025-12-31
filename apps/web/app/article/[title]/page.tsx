@@ -1,4 +1,4 @@
-import { fetchArticleById } from '@/lib/api';
+import { fetchArticleByTitle } from '@/lib/api';
 import { Clock, User, ExternalLink, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -8,14 +8,15 @@ import type { Metadata } from 'next';
 
 interface ArticlePageProps {
   params: Promise<{
-    id: string;
+    title: string;
   }>;
 }
 
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
   try {
-    const { id } = await params;
-    const article = await fetchArticleById(id);
+    const { title } = await params;
+    const decodedTitle = decodeURIComponent(title);
+    const article = await fetchArticleByTitle(decodedTitle);
     return {
       title: article.title || 'Article Details',
       description: article.summary || article.description || 'Read the full article',
@@ -28,11 +29,12 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
-  const { id } = await params;
+  const { title } = await params;
+  const decodedTitle = decodeURIComponent(title);
   let article;
 
   try {
-    article = await fetchArticleById(id);
+    article = await fetchArticleByTitle(decodedTitle);
   } catch {
     notFound();
   }

@@ -35,4 +35,17 @@ export class ArticlesService {
       where: { id },
     });
   }
+
+  async getArticleByTitle(title: string): Promise<Article | null> {
+    const decodedTitle = decodeURIComponent(title);
+
+    return this.prisma.client.article.findFirst({
+      where: {
+        title: {
+          equals: decodedTitle,
+          mode: 'insensitive',
+        },
+      },
+    });
+  }
 }

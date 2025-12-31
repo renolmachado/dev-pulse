@@ -43,3 +43,28 @@ export async function fetchArticleById(id: string): Promise<Article> {
     throw new Error(error instanceof Error ? error.message : 'Unable to load article. Please check your connection and try again.');
   }
 }
+
+export async function fetchArticleByTitle(title: string): Promise<Article> {
+  try {
+    const encodedTitle = encodeURIComponent(title);
+
+    console.log(JSON.stringify(encodedTitle, null, 2), 'encodedTitle', title);
+
+    const response = await fetch(`${API_BASE_URL}/articles/by-title/${encodedTitle}`, {
+      next: { revalidate: 60 },
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch article: ${response.status} ${response.statusText}`);
+    }
+
+    const data: Article = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching article:', error);
+    throw new Error(error instanceof Error ? error.message : 'Unable to load article. Please check your connection and try again.');
+  }
+}

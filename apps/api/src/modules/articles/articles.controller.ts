@@ -25,6 +25,18 @@ export class ArticlesController {
     return this.articlesService.getArticles(pageNum, limitNum);
   }
 
+  @Get('by-title/:title')
+  async getArticleByTitle(@Param('title') title: string): Promise<Article> {
+    const article = await this.articlesService.getArticleByTitle(title);
+
+    console.log(JSON.stringify(article, null, 2), 'article', title);
+    if (article === null) {
+      throw new NotFoundException(`Article with title "${decodeURIComponent(title)}" not found`);
+    }
+
+    return article;
+  }
+
   @Get(':id')
   async getArticleById(@Param('id') id: string): Promise<Article> {
     const article = await this.articlesService.getArticleById(id);
