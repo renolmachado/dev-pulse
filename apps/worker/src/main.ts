@@ -9,7 +9,7 @@ async function bootstrap() {
     methods: ['GET'],
   });
 
-  await app.listen(process.env.PORT ?? 8002);
+  await app.listen(process.env.PORT ?? 8004);
   console.log('Worker started');
 }
 bootstrap();
