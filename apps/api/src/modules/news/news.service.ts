@@ -62,6 +62,7 @@ export class NewsService {
       await this.newsQueue.add('process-news', articlesData, {
         attempts: 3,
         backoff: 5000,
+        removeOnComplete: true,
       });
     } catch (error) {
       // TODO Send error to Sentry
