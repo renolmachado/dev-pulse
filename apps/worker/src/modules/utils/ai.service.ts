@@ -128,15 +128,15 @@ export class AiService {
           {
             role: 'system',
             content:
-              'You are a professional content summarizer. Create concise, informative summaries that capture the key points and main ideas of articles. Keep summaries between 2-4 sentences.',
+              'You are a professional content summarizer. Create concise, informative summaries that capture the key points and main ideas of articles. Keep summaries between 2-4 sentences. Return ONLY the summary text without any preamble, introduction, or phrases like "Here is a summary" or "This article discusses". Start directly with the summary content.',
           },
           {
             role: 'user',
-            content: `Please summarize the following article:\n\n${contentToSummarize}`,
+            content: `Summarize the following article:\n\n${contentToSummarize}`,
           },
         ],
         model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-        temperature: 0.5,
+        temperature: 0.2,
         max_completion_tokens: 500,
       });
 
