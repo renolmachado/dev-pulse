@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
+import { ThemeToggle } from '@/components/theme-toggle';
 import type { Metadata } from 'next';
 
 interface ArticlePageProps {
@@ -58,10 +59,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     <div className="min-h-screen bg-background">
       <header className="bg-gradient-to-br from-primary to-purple-700 text-white shadow-md">
         <div className="container mx-auto px-4 py-6">
-          <Link href="/" className="inline-flex items-center gap-2 text-sm hover:underline opacity-90 hover:opacity-100 transition-opacity">
-            <ArrowLeft className="h-4 w-4" />
-            Back to News Feed
-          </Link>
+          <div className="flex items-center justify-between">
+            <Link href="/" className="inline-flex items-center gap-2 text-sm hover:underline opacity-90 hover:opacity-100 transition-opacity">
+              <ArrowLeft className="h-4 w-4" />
+              Back to News Feed
+            </Link>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 

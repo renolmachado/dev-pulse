@@ -1,4 +1,5 @@
 import { ArticleCard } from '@/components/article-card/article-card';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { fetchArticles } from '@/lib/api';
 
 export default async function Home() {
@@ -7,9 +8,17 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-10 bg-gradient-to-br from-primary to-purple-700 text-white shadow-md">
-        <div className="container mx-auto px-4 py-6 text-center md:py-8">
-          <h1 className="text-3xl font-bold tracking-tight md:text-4xl">News Pulse</h1>
-          <p className="mt-2 text-sm opacity-90 md:text-base">Your daily dose of news • {total} articles</p>
+        <div className="container mx-auto px-4 py-6 md:py-8">
+          <div className="flex items-center justify-between">
+            <div className="flex-1" />
+            <div className="flex-1 text-center">
+              <h1 className="text-3xl font-bold tracking-tight md:text-4xl">News Pulse</h1>
+              <p className="mt-2 text-sm opacity-90 md:text-base">Your daily dose of news • {total} articles</p>
+            </div>
+            <div className="flex flex-1 justify-end">
+              <ThemeToggle />
+            </div>
+          </div>
         </div>
       </header>
 
