@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../utils/prisma.service';
 import { GetArticlesResponseDto } from './articles.dto';
+import type { Article } from '@repo/database';
 
 @Injectable()
 export class ArticlesService {
@@ -27,5 +28,11 @@ export class ArticlesService {
       page,
       totalPages: Math.ceil(total / limit),
     };
+  }
+
+  async getArticleById(id: string): Promise<Article | null> {
+    return this.prisma.client.article.findUnique({
+      where: { id },
+    });
   }
 }
