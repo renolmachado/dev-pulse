@@ -120,7 +120,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
           {/* Read Original Article Link */}
           <div className="mt-8 flex justify-center">
-            <LinkIcon url={article.url} />
+            <LinkIcon url={article.url} hiddenOnMobile={false} />
           </div>
         </article>
 

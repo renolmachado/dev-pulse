@@ -25,7 +25,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
   const articleUrl = article.title ? `/article/${encodeURIComponent(article.title)}` : `/article/${article.id}`;
 
   return (
-    <Link href={articleUrl} className="block">
+    <Link href={articleUrl} className="grid">
       <Card className="group cursor-pointer overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg" role="button" tabIndex={0}>
         {article.urlToImage && (
           <div className="relative h-48 w-full overflow-hidden bg-muted">
