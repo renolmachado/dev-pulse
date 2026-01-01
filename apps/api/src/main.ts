@@ -8,8 +8,6 @@ async function bootstrap() {
     origin: [
       /^http:\/\/localhost:(.*)/,
       'https://dev-pulse-web-gules.vercel.app',
-      /^https:\/\/(.*)\.vercel\.app/,
-      '*',
     ],
     methods: ['GET'],
   });
