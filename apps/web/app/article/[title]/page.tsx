@@ -1,11 +1,11 @@
 import { fetchArticleByTitle } from '@/lib/api';
-import { Clock, User, ExternalLink, ArrowLeft, Sparkles } from 'lucide-react';
+import { Clock, User, Sparkles } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Card, CardContent } from '@/components/ui/card';
-import { ThemeToggle } from '@/components/theme-toggle';
 import type { Metadata } from 'next';
+import { Card, CardContent } from '@/components/ui/card';
+import { Header } from '@/components/header';
+import LinkIcon from '@/components/link-icon/link-icon';
 
 interface ArticlePageProps {
   params: Promise<{
@@ -57,17 +57,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-gradient-to-br from-primary to-purple-700 text-white shadow-md">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="inline-flex items-center gap-2 text-sm hover:underline opacity-90 hover:opacity-100 transition-opacity">
-              <ArrowLeft className="h-4 w-4" />
-              Back to News Feed
-            </Link>
-            <ThemeToggle />
-          </div>
-        </div>
-      </header>
+      <Header showBackButton />
 
       <main className="container mx-auto max-w-4xl px-4 py-8">
         <article>
@@ -130,14 +120,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
           {/* Read Original Article Link */}
           <div className="mt-8 flex justify-center">
-            <a
-              href={article.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-semibold text-white transition-all hover:bg-primary/90 hover:shadow-lg">
-              Read Original Article
-              <ExternalLink className="h-4 w-4" />
-            </a>
+            <LinkIcon url={article.url} />
           </div>
         </article>
 

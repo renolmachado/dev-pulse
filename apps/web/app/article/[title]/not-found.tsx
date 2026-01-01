@@ -1,20 +1,11 @@
-import { ArrowLeft, FileQuestion } from 'lucide-react';
+import { FileQuestion } from 'lucide-react';
 import Link from 'next/link';
+import { Header } from '@/components/header';
 
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-gradient-to-br from-primary to-purple-700 text-white shadow-md">
-        <div className="container mx-auto px-4 py-6">
-          <Link 
-            href="/" 
-            className="inline-flex items-center gap-2 text-sm hover:underline opacity-90 hover:opacity-100 transition-opacity"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to News Feed
-          </Link>
-        </div>
-      </header>
+      <Header showBackButton />
 
       <main className="container mx-auto max-w-4xl px-4 py-8">
         <div className="flex min-h-[400px] flex-col items-center justify-center text-center">
