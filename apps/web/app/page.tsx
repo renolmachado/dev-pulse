@@ -1,5 +1,6 @@
 import { ArticleCard } from '@/components/article-card/article-card';
 import { Header } from '@/components/header';
+import { LoadMoreArticles } from '@/components/article-list';
 import { fetchArticles } from '@/lib/api';
 
 export default async function Home() {
@@ -20,16 +21,10 @@ export default async function Home() {
               <p className="text-center text-base text-muted-foreground">No articles available yet. Check back soon!</p>
             </div>
           )}
+
+          {articles.length > 0 && <LoadMoreArticles initialPage={page} initialTotalPages={totalPages} initialTotal={total} />}
         </div>
       </main>
-
-      {totalPages > 1 && (
-        <footer className="border-t py-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            Page {page} of {totalPages}
-          </p>
-        </footer>
-      )}
     </div>
   );
 }

@@ -114,7 +114,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           {article.content && (
             <div className="mb-8 prose prose-slate max-w-none">
               <h2 className="text-xl font-semibold mb-4">Full Content</h2>
-              <div className="whitespace-pre-wrap text-base leading-relaxed text-foreground">{article.content}</div>
+              <div className="text-base leading-relaxed text-foreground">{article.content}</div>
             </div>
           )}
 
