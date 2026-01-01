@@ -18,6 +18,7 @@ export async function fetchArticles(page: number = 1, limit: number = 20): Promi
     const data: ArticlesResponse = await response.json();
     return data;
   } catch (error) {
+    console.error(API_BASE_URL, 'API_BASE_URL');
     console.error('Error fetching articles:', error);
     throw new Error(error instanceof Error ? error.message : 'Unable to load articles. Please check your connection and try again.');
   }
