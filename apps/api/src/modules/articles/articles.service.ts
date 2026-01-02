@@ -13,9 +13,14 @@ export class ArticlesService {
   ): Promise<GetArticlesResponseDto> {
     const [articles, total] = await Promise.all([
       this.prisma.client.article.findMany({
-        orderBy: {
-          publishedAt: 'desc',
-        },
+        orderBy: [
+          {
+            publishedAt: 'desc',
+          },
+          {
+            title: 'desc',
+          },
+        ],
         take: limit,
         skip: (page - 1) * limit,
       }),

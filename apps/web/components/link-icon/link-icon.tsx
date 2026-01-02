@@ -14,7 +14,7 @@ export function LinkIcon({ url, hiddenOnMobile = true }: LinkIconProps) {
   };
 
   return (
-    <button onClick={handleClick} className="flex items-center gap-1.5 rounded-md px-2 py-1 font-medium text-primary transition-colors hover:bg-primary/10">
+    <button aria-label="View source" onClick={handleClick} className="flex items-center gap-1.5 rounded-md px-2 py-1 font-medium text-primary transition-colors hover:bg-primary/10">
       <span className={cn(hiddenOnMobile ? 'hidden sm:inline' : '')}>View Source</span>
       <ExternalLink className="h-3.5 w-3.5" />
     </button>

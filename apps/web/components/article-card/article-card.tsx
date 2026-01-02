@@ -7,9 +7,10 @@ import LinkIcon from '../link-icon/link-icon';
 
 interface ArticleCardProps {
   article: Article;
+  priority?: boolean;
 }
 
-export function ArticleCard({ article }: ArticleCardProps) {
+export function ArticleCard({ article, priority = false }: ArticleCardProps) {
   const formattedDate = Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
@@ -35,6 +36,8 @@ export function ArticleCard({ article }: ArticleCardProps) {
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
+              priority={priority}
+              loading={priority ? undefined : 'lazy'}
             />
           </div>
         )}

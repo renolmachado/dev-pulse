@@ -12,8 +12,8 @@ export default async function Home() {
 
       <main className="container mx-auto max-w-4xl px-4 py-4 md:py-6">
         <div className="grid gap-4 md:gap-5">
-          {articles.map((article) => (
-            <ArticleCard key={article.id} article={article} />
+          {articles.map((article, index) => (
+            <ArticleCard key={article.id} article={article} priority={index < 2} />
           ))}
 
           {articles.length === 0 && (
