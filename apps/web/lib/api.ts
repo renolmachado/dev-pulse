@@ -49,8 +49,6 @@ export async function fetchArticleByTitle(title: string): Promise<Article> {
   try {
     const encodedTitle = encodeURIComponent(title);
 
-    console.log(JSON.stringify(encodedTitle, null, 2), 'encodedTitle', title);
-
     const response = await fetch(`${API_BASE_URL}/articles/by-title/${encodedTitle}`, {
       next: { revalidate: 60 },
       headers: {
@@ -63,6 +61,7 @@ export async function fetchArticleByTitle(title: string): Promise<Article> {
     }
 
     const data: Article = await response.json();
+
     return data;
   } catch (error) {
     console.error('Error fetching article:', error);
