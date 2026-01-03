@@ -71,19 +71,9 @@ export function ArticleCard({ article, priority = false }: ArticleCardProps) {
           )}
 
           {article.description && (
-            <div className="mb-3">
+            <div>
               {article.summary && <p className="mb-1 text-xs font-medium text-muted-foreground">Original Description</p>}
               <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">{article.description}</p>
-            </div>
-          )}
-
-          {article.keywords.length > 0 && (
-            <div className="mb-3">
-              <div className="mb-1.5 flex items-center gap-1.5">
-                <Hash className="h-3 w-3 text-primary" />
-                <span className="text-xs font-medium text-primary">Keywords</span>
-              </div>
-              <p className="text-sm leading-relaxed text-foreground line-clamp-2">{article.keywords.join(', ').toLowerCase()}</p>
             </div>
           )}
         </CardContent>

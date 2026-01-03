@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import type { Article } from '@/types/article';
+import type { Article, Category } from '@/types/article';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface UseLoadMoreArticlesProps {
   initialPage: number;
   initialTotalPages: number;
+  category: Category | undefined;
 }
 
-export const useLoadMoreArticles = ({ initialPage, initialTotalPages }: UseLoadMoreArticlesProps) => {
+export const useLoadMoreArticles = ({ initialPage, initialTotalPages, category }: UseLoadMoreArticlesProps) => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [page, setPage] = useState(initialPage);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,7 +23,16 @@ export const useLoadMoreArticles = ({ initialPage, initialTotalPages }: UseLoadM
     setIsLoading(true);
     try {
       const nextPage = page + 1;
-      const response = await fetch(`${API_BASE_URL}/articles?page=${nextPage}&limit=20`);
+      const params = new URLSearchParams({
+        page: nextPage.toString(),
+        limit: '20',
+      });
+
+      if (category) {
+        params.append('category', category);
+      }
+
+      const response = await fetch(`${API_BASE_URL}/articles?${params.toString()}`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch articles');
@@ -38,7 +48,7 @@ export const useLoadMoreArticles = ({ initialPage, initialTotalPages }: UseLoadM
     } finally {
       setIsLoading(false);
     }
-  }, [page, isLoading, hasMore]);
+  }, [page, isLoading, hasMore, category]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(

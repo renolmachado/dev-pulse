@@ -1,11 +1,11 @@
 import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
-import type { Article, Prisma } from '@prisma/client';
+import type { Article, Prisma, Category, Language } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
 
 // Re-export Prisma types
-export type { Article, PrismaClient, Prisma };
+export type { Article, PrismaClient, Prisma, Category, Language };
 
 // Manually define and export ProcessingStatus enum
 // This matches the enum defined in the Prisma schema

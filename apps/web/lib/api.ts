@@ -1,10 +1,19 @@
-import type { Article, ArticlesResponse } from '../types/article';
+import type { Article, ArticlesResponse, Category } from '../types/article';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-export async function fetchArticles(page: number = 1, limit: number = 20): Promise<ArticlesResponse> {
+export async function fetchArticles(page: number = 1, limit: number = 20, category?: Category): Promise<ArticlesResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}/articles?page=${page}&limit=${limit}`, {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+
+    if (category) {
+      params.append('category', category);
+    }
+
+    const response = await fetch(`${API_BASE_URL}/articles?${params.toString()}`, {
       next: { revalidate: 60 },
       headers: {
         'Content-Type': 'application/json',

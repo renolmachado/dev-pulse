@@ -1,7 +1,9 @@
 'use client';
 
+import { useSearchParams } from 'next/navigation';
 import { ArticleCard } from '@/components/article-card/article-card';
 import { ArticleCardSkeleton } from '@/components/article-card/article-card-skeleton';
+import { Category } from '@/types/article';
 import { useLoadMoreArticles } from './use-load-more-articles';
 
 interface LoadMoreArticlesProps {
@@ -11,7 +13,14 @@ interface LoadMoreArticlesProps {
 }
 
 export function LoadMoreArticles({ initialPage, initialTotalPages, initialTotal }: LoadMoreArticlesProps) {
-  const { articles, isLoading, hasMore, observerTarget } = useLoadMoreArticles({ initialPage, initialTotalPages });
+  const searchParams = useSearchParams();
+  const category = searchParams.get('category') as Category | undefined;
+
+  const { articles, isLoading, hasMore, observerTarget } = useLoadMoreArticles({
+    initialPage,
+    initialTotalPages,
+    category,
+  });
 
   return (
     <>

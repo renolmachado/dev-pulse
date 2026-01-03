@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../utils/prisma.service';
 import { GetArticlesResponseDto } from './articles.dto';
-import type { Article } from '@repo/database';
+import { Article, Category } from '@repo/database';
 
 @Injectable()
 export class ArticlesService {
@@ -10,9 +10,12 @@ export class ArticlesService {
   async getArticles(
     page: number,
     limit: number,
+    category?: Category,
   ): Promise<GetArticlesResponseDto> {
+    const where = category ? { category } : {};
     const [articles, total] = await Promise.all([
       this.prisma.client.article.findMany({
+        where,
         orderBy: [
           {
             publishedAt: 'desc',
@@ -24,7 +27,7 @@ export class ArticlesService {
         take: limit,
         skip: (page - 1) * limit,
       }),
-      this.prisma.client.article.count(),
+      this.prisma.client.article.count({ where }),
     ]);
 
     return {

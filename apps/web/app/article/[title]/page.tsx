@@ -1,5 +1,5 @@
 import { fetchArticleByTitle } from '@/lib/api';
-import { Clock, User, Sparkles } from 'lucide-react';
+import { Clock, User, Sparkles, Tag } from 'lucide-react';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
@@ -55,6 +55,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     minute: '2-digit',
   }).format(new Date(article.publishedAt));
 
+  const formattedCategory = article.category
+    ? article.category
+        .split('_')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ')
+    : 'Unknown';
+
   return (
     <div className="min-h-screen bg-background">
       <Header showBackButton />
@@ -84,6 +91,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               <time dateTime={article.publishedAt}>
                 {formattedDate} • {formattedTime}
               </time>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">
+              <Tag className="h-3.5 w-3.5" />
+              <span>{formattedCategory}</span>
             </div>
           </div>
 

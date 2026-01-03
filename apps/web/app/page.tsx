@@ -2,9 +2,17 @@ import { ArticleCard } from '@/components/article-card/article-card';
 import { Header } from '@/components/header';
 import { LoadMoreArticles } from '@/components/article-list';
 import { fetchArticles } from '@/lib/api';
+import { Category } from '@/types/article';
 
-export default async function Home() {
-  const { articles, total, page, totalPages } = await fetchArticles(1, 20);
+interface HomeProps {
+  searchParams: Promise<{
+    category?: Category;
+  }>;
+}
+
+export default async function Home({ searchParams }: HomeProps) {
+  const params = await searchParams;
+  const { articles, total, page, totalPages } = await fetchArticles(1, 20, params.category);
 
   return (
     <div className="min-h-screen bg-background">
