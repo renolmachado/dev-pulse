@@ -21,12 +21,16 @@ model Article {
   // To track the microservice pipeline
   status      ProcessingStatus @default(PENDING)
   summary     String?  @db.Text
+  keywords    String[]
+  category    Category?
+  language    Language @default(EN)
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([publishedAt(sort: Desc)])
   @@index([publishedAt(sort: Desc), id(sort: Desc)])
+  @@index([category(sort: Desc), id(sort: Desc)])
 }
 
 enum ProcessingStatus {
@@ -34,4 +38,24 @@ enum ProcessingStatus {
   PROCESSING
   COMPLETED
   FAILED
+}
+
+enum Category {
+  LIFESTYLE_WELLNESS
+  TECHNOLOGY_INNOVATION
+  SOFTWARE_ENGINEERING_DEVELOPMENT
+  BUSINESS_FINANCE
+  ARTS_ENTERTAINMENT
+  NEWS_SOCIETY
+  SCIENCE_NATURE
+  POLITICS_GOVERNMENT
+  SPORTS_RECREATION
+  EDUCATION_CAREER
+  HEALTH_MEDICINE
+}
+
+enum Language {
+  EN
+  ES
+  PT
 }
