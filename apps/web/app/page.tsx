@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { ArticleCard } from '@/components/article-card/article-card';
 import { Header } from '@/components/header';
 import { LoadMoreArticles } from '@/components/article-list';
@@ -16,7 +17,9 @@ export default async function Home({ searchParams }: HomeProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header articleCount={total} />
+      <Suspense fallback={<div className="h-16" />}>
+        <Header articleCount={total} />
+      </Suspense>
 
       <main className="container mx-auto max-w-4xl px-4 py-4 md:py-6">
         <div className="grid gap-4 md:gap-5">
@@ -30,7 +33,11 @@ export default async function Home({ searchParams }: HomeProps) {
             </div>
           )}
 
-          {articles.length > 0 && <LoadMoreArticles initialPage={page} initialTotalPages={totalPages} initialTotal={total} />}
+          {articles.length > 0 && (
+            <Suspense fallback={null}>
+              <LoadMoreArticles initialPage={page} initialTotalPages={totalPages} initialTotal={total} />
+            </Suspense>
+          )}
         </div>
       </main>
     </div>

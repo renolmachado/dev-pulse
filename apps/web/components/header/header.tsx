@@ -3,42 +3,15 @@
 import { ArrowLeft, Newspaper, Filter } from 'lucide-react';
 import Link from 'next/link';
 import { ThemeToggle } from '../theme';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Category } from '@/types/article';
+import { useHeader } from './useHeader';
 
 interface HeaderProps {
   showBackButton?: boolean;
   articleCount?: number;
 }
 
-const categoryOptions = [
-  { value: '', label: 'All Categories' },
-  { value: Category.LIFESTYLE_WELLNESS, label: 'Lifestyle & Wellness' },
-  { value: Category.TECHNOLOGY_INNOVATION, label: 'Technology & Innovation' },
-  { value: Category.SOFTWARE_ENGINEERING_DEVELOPMENT, label: 'Software Engineering' },
-  { value: Category.BUSINESS_FINANCE, label: 'Business & Finance' },
-  { value: Category.ARTS_ENTERTAINMENT, label: 'Arts & Entertainment' },
-  { value: Category.NEWS_SOCIETY, label: 'News & Society' },
-  { value: Category.SCIENCE_NATURE, label: 'Science & Nature' },
-  { value: Category.POLITICS_GOVERNMENT, label: 'Politics & Government' },
-  { value: Category.SPORTS_RECREATION, label: 'Sports & Recreation' },
-  { value: Category.EDUCATION_CAREER, label: 'Education & Career' },
-  { value: Category.HEALTH_MEDICINE, label: 'Health & Medicine' },
-];
-
 export function Header({ showBackButton = false, articleCount }: HeaderProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const currentCategory = searchParams.get('category') || '';
-
-  const handleCategoryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const category = event.target.value;
-    if (category) {
-      router.push(`/?category=${category}`);
-    } else {
-      router.push('/');
-    }
-  };
+  const { currentCategory, handleCategoryChange, categoryOptions } = useHeader();
 
   return (
     <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
