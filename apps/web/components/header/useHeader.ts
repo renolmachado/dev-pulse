@@ -1,4 +1,5 @@
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTransition } from 'react';
 import { Category } from '@/types/article';
 
 export const categoryOptions = [
@@ -19,20 +20,24 @@ export const categoryOptions = [
 export const useHeader = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
   const currentCategory = searchParams.get('category') || '';
 
   const handleCategoryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const category = event.target.value;
-    if (category) {
-      router.push(`/?category=${category}`);
-    } else {
-      router.push('/');
-    }
+    startTransition(() => {
+      if (category) {
+        router.push(`/?category=${category}`);
+      } else {
+        router.push('/');
+      }
+    });
   };
 
   return {
     currentCategory,
     handleCategoryChange,
     categoryOptions,
+    isPending,
   };
 };
