@@ -19,7 +19,6 @@
     "@repo/database": "workspace:*",
     "@repo/health-check": "workspace:*",
     "axios": "^1.13.2",
-    "cheerio": "^1.0.0-rc.12",
     "commander": "^12.0.0",
     "groq-sdk": "^0.37.0",
     "openai": "^4.77.0",
