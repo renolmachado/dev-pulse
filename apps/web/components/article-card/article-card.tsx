@@ -1,5 +1,5 @@
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Clock, User, Sparkles } from 'lucide-react';
+import { Clock, User, Sparkles, Hash, Tag } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Article } from '@/types/article';
@@ -25,6 +25,13 @@ export function ArticleCard({ article, priority = false }: ArticleCardProps) {
   // Create URL-friendly title
   const articleUrl = article.title ? `/article/${encodeURIComponent(article.title)}` : `/article/${article.id}`;
 
+  const formattedCategory = article.category
+    ? article.category
+        .split('_')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ')
+    : 'Unknown';
+
   return (
     <Link href={articleUrl} className="grid">
       <Card className="group cursor-pointer overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg" role="button" tabIndex={0}>
@@ -43,9 +50,16 @@ export function ArticleCard({ article, priority = false }: ArticleCardProps) {
         )}
 
         <CardContent className="p-4">
-          <h2 className="mb-3 line-clamp-3 text-lg font-semibold leading-tight text-foreground">{article.title || 'Untitled'}</h2>
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h2 className="line-clamp-3 text-lg font-semibold leading-tight text-foreground">{article.title || 'Untitled'}</h2>
+            <div className="flex-shrink-0">
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+                <Tag className="h-3 w-3" />
+                {formattedCategory}
+              </span>
+            </div>
+          </div>
 
-          {/* AI-Generated Summary */}
           {article.summary && (
             <div className="mb-3">
               <div className="mb-1.5 flex items-center gap-1.5">
@@ -56,17 +70,26 @@ export function ArticleCard({ article, priority = false }: ArticleCardProps) {
             </div>
           )}
 
-          {/* Original Description */}
           {article.description && (
-            <div>
+            <div className="mb-3">
               {article.summary && <p className="mb-1 text-xs font-medium text-muted-foreground">Original Description</p>}
               <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">{article.description}</p>
+            </div>
+          )}
+
+          {article.keywords.length > 0 && (
+            <div className="mb-3">
+              <div className="mb-1.5 flex items-center gap-1.5">
+                <Hash className="h-3 w-3 text-primary" />
+                <span className="text-xs font-medium text-primary">Keywords</span>
+              </div>
+              <p className="text-sm leading-relaxed text-foreground line-clamp-2">{article.keywords.join(', ').toLowerCase()}</p>
             </div>
           )}
         </CardContent>
 
         <CardFooter className="flex items-center justify-between border-t px-4 py-3 text-xs text-muted-foreground">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0 w-full">
             {article.author && (
               <div className="flex items-center gap-1.5 overflow-hidden">
                 <User className="h-3.5 w-3.5 flex-shrink-0" />
