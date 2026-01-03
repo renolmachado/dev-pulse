@@ -1,9 +1,9 @@
-import { Suspense } from 'react';
 import { ArticleCard } from '@/components/article-card/article-card';
 import { Header } from '@/components/header';
 import { LoadMoreArticles } from '@/components/article-list';
 import { fetchArticles } from '@/lib/api';
 import { Category } from '@/types/article';
+import { Suspense } from 'react';
 
 interface HomeProps {
   searchParams: Promise<{
@@ -17,9 +17,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <Suspense fallback={<div className="h-16" />}>
-        <Header articleCount={total} />
-      </Suspense>
+      <Header articleCount={total} />
 
       <main className="container mx-auto max-w-4xl px-4 py-4 md:py-6">
         <div className="grid gap-4 md:gap-5">

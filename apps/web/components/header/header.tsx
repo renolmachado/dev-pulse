@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { ArrowLeft, Newspaper, Filter } from 'lucide-react';
 import Link from 'next/link';
 import { ThemeToggle } from '../theme';
@@ -10,7 +11,7 @@ interface HeaderProps {
   articleCount?: number;
 }
 
-export function Header({ showBackButton = false, articleCount }: HeaderProps) {
+function HeaderContent({ showBackButton = false, articleCount }: HeaderProps) {
   const { currentCategory, handleCategoryChange, categoryOptions } = useHeader();
 
   return (
@@ -60,5 +61,13 @@ export function Header({ showBackButton = false, articleCount }: HeaderProps) {
         </div>
       </div>
     </header>
+  );
+}
+
+export function Header(props: HeaderProps) {
+  return (
+    <Suspense fallback={<div className="h-16 border-b bg-background/95" />}>
+      <HeaderContent {...props} />
+    </Suspense>
   );
 }
