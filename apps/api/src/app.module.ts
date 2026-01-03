@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { HealthCheckModule } from '@repo/health-check';
-import { AppController } from './app.controller';
 import { NewsModule } from './modules/news/news.module';
 import { ArticlesModule } from './modules/articles/articles.module';
 
@@ -12,7 +11,5 @@ import { ArticlesModule } from './modules/articles/articles.module';
     HealthCheckModule,
     ArticlesModule,
   ],
-  controllers: [AppController],
-  providers: [],
 })
 export class AppModule {}
