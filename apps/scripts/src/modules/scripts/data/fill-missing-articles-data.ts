@@ -27,17 +27,18 @@ const generateArticleMetadata = async (article: Article): Promise<ArticleMetadat
   const prompt = `You are an expert content analyzer. Analyze the article from the following URL and provide structured metadata.
 
 Article URL: ${article.url}
+${article.title ? `Article Title: ${article.title}` : ''}
 
 Provide the analysis in valid JSON format with these exact fields:
 {
-  "summary": "informative summaries that capture the key points and main ideas of articles. Keep summaries between 2-4 sentences. Return ONLY the summary text without any preamble, introduction, or phrases like "Here is a summary" or "This article discusses". Start directly with the summary content.",
+  "summary": "informative summaries that capture the key points and main ideas of articles. Keep summaries between 2-4 sentences. Use the article title as a guide to focus on the main topic and key aspects. Return ONLY the summary text without any preamble, introduction, or phrases like "Here is a summary" or "This article discusses". Start directly with the summary content.",
   "category": "One of: ${availableCategories}",
   "language": "One of: ${availableLanguages}",
   "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"]
 }
 
 Rules:
-- summary: 2-4 sentences, no preamble
+- summary: 2-4 sentences, no preamble. Focus the summary on what the article title suggests as the main topic.
 - category: Must match exactly one of the available categories
 - language: Must match exactly one of the available languages (EN, ES, or PT)
 - keywords: Array of exactly 5 relevant keywords
@@ -56,6 +57,7 @@ JSON:`;
         prompt: prompt,
         stream: false,
         format: 'json',
+        temperature: 0.2,
       }),
     });
 

@@ -140,29 +140,30 @@ export class AiService {
           {
             role: 'system',
             content:
-              'You are an expert content analyzer. Analyze articles and provide structured metadata in valid JSON format. Return ONLY valid JSON, no other text or explanation.',
+              'You are an expert content analyzer. Analyze articles and provide structured metadata in valid JSON format. Pay special attention to the article title as it provides crucial context about the main topic. Return ONLY valid JSON, no other text or explanation.',
           },
           {
             role: 'user',
             content: `Analyze the following article and provide structured metadata.
 
 Article URL: ${article.url}
+${article.title ? `Article Title: ${article.title}` : ''}
 
 ${contentToAnalyze}
 
 Provide the analysis in valid JSON format with these exact fields:
 {
-  "summary": "informative summaries that capture the key points and main ideas of articles. Keep summaries between 2-4 sentences. Return ONLY the summary text without any preamble, introduction, or phrases like "Here is a summary" or "This article discusses". Start directly with the summary content.",
+  "summary": "informative summaries that capture the key points and main ideas of articles. Keep summaries between 2-4 sentences. Use the article title as a primary guide to understand the article's focus and key message. Return ONLY the summary text without any preamble, introduction, or phrases like "Here is a summary" or "This article discusses". Start directly with the summary content.",
   "category": "One of: ${availableCategories}",
   "language": "One of: ${availableLanguages}",
   "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"]
 }
 
 Rules:
-- summary: 2-4 sentences, no preamble
-- category: Must match exactly one of the available categories
+- summary: 2-4 sentences, no preamble. Let the article title guide you to the main topic and ensure the summary aligns with it.
+- category: Must match exactly one of the available categories. Consider the article title when determining the category.
 - language: Must match exactly one of the available languages (EN, ES, or PT)
-- keywords: Array of exactly 5 relevant keywords
+- keywords: Array of exactly 5 relevant keywords that reflect both the title and content
 - Return ONLY valid JSON, no other text
 
 JSON:`,
