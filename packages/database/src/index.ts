@@ -6,7 +6,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
 
 // Re-export Prisma types
-export type { Article, Prisma };
+export type { Article, Prisma, PrismaClient };
 
 // Re-export enums as both types and values
 export { Category, Language };
