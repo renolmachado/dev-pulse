@@ -1,5 +1,17 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/create-next-app).
 
+## Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```env
+# API Configuration
+NEXT_PUBLIC_API_URL=http://localhost:3001
+
+# Site Configuration (required for sitemap and SEO)
+NEXT_PUBLIC_SITE_URL=https://your-domain.com
+```
+
 ## Getting Started
 
 First, run the development server:
