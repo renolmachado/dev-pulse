@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Test, TestingModule } from '@nestjs/testing';
 import { NewsProcessorService } from './news-processor.service';
 import { AiService } from '../utils/ai.service';
 import { PrismaService } from '../utils/prisma.service';
-import { ProcessingStatus, Article } from '@repo/database';
+import { ProcessingStatus, Article, Category, Language } from '@repo/database';
 
 describe('NewsProcessorService', () => {
   let service: NewsProcessorService;
@@ -15,10 +16,12 @@ describe('NewsProcessorService', () => {
   };
 
   const mockAiService = {
-    generateSummary: jest.fn(),
+    generateMetadata: jest.fn(),
   };
 
   beforeEach(async () => {
+    jest.useFakeTimers();
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         NewsProcessorService,
@@ -40,6 +43,7 @@ describe('NewsProcessorService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    jest.useRealTimers();
   });
 
   it('should be defined', () => {
@@ -47,7 +51,7 @@ describe('NewsProcessorService', () => {
   });
 
   describe('processNews', () => {
-    it('should process new articles successfully with summaries', async () => {
+    it('should process new articles successfully with metadata', async () => {
       const mockArticles = [
         {
           id: '1',
@@ -60,6 +64,9 @@ describe('NewsProcessorService', () => {
           urlToImage: null,
           summary: null,
           status: ProcessingStatus.PENDING,
+          category: null,
+          keywords: [],
+          language: Language.EN,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -74,20 +81,39 @@ describe('NewsProcessorService', () => {
           urlToImage: null,
           summary: null,
           status: ProcessingStatus.PENDING,
+          category: null,
+          keywords: [],
+          language: Language.EN,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
       ];
 
-      const mockSummary1 = 'This is a summary of article 1';
-      const mockSummary2 = 'This is a summary of article 2';
+      const mockMetadata1 = {
+        summary: 'This is a summary of article 1',
+        category: Category.TECHNOLOGY_INNOVATION,
+        language: Language.EN,
+        keywords: ['tech', 'innovation', 'test', 'article', 'one'],
+      };
+
+      const mockMetadata2 = {
+        summary: 'This is a summary of article 2',
+        category: Category.SOFTWARE_ENGINEERING_DEVELOPMENT,
+        language: Language.EN,
+        keywords: ['software', 'engineering', 'test', 'article', 'two'],
+      };
 
       mockPrismaClient.article.findMany.mockResolvedValue([]);
-      mockAiService.generateSummary
-        .mockResolvedValueOnce(mockSummary1)
-        .mockResolvedValueOnce(mockSummary2);
+      mockAiService.generateMetadata
+        .mockResolvedValueOnce(mockMetadata1)
+        .mockResolvedValueOnce(mockMetadata2);
 
-      await service.processNews(mockArticles);
+      const processPromise = service.processNews(mockArticles);
+
+      // Fast-forward through all timers
+      await jest.runAllTimersAsync();
+
+      await processPromise;
 
       expect(mockPrismaClient.article.findMany).toHaveBeenCalledWith({
         where: {
@@ -100,11 +126,11 @@ describe('NewsProcessorService', () => {
         },
       });
 
-      expect(mockAiService.generateSummary).toHaveBeenCalledTimes(2);
-      expect(mockAiService.generateSummary).toHaveBeenCalledWith(
+      expect(mockAiService.generateMetadata).toHaveBeenCalledTimes(2);
+      expect(mockAiService.generateMetadata).toHaveBeenCalledWith(
         mockArticles[0],
       );
-      expect(mockAiService.generateSummary).toHaveBeenCalledWith(
+      expect(mockAiService.generateMetadata).toHaveBeenCalledWith(
         mockArticles[1],
       );
 
@@ -112,12 +138,18 @@ describe('NewsProcessorService', () => {
         data: [
           {
             ...mockArticles[0],
-            summary: mockSummary1,
+            summary: mockMetadata1.summary,
+            category: mockMetadata1.category,
+            language: mockMetadata1.language,
+            keywords: mockMetadata1.keywords,
             status: ProcessingStatus.COMPLETED,
           },
           {
             ...mockArticles[1],
-            summary: mockSummary2,
+            summary: mockMetadata2.summary,
+            category: mockMetadata2.category,
+            language: mockMetadata2.language,
+            keywords: mockMetadata2.keywords,
             status: ProcessingStatus.COMPLETED,
           },
         ],
@@ -137,6 +169,9 @@ describe('NewsProcessorService', () => {
           urlToImage: null,
           summary: null,
           status: ProcessingStatus.PENDING,
+          category: null,
+          keywords: [],
+          language: Language.EN,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -151,6 +186,9 @@ describe('NewsProcessorService', () => {
           urlToImage: null,
           summary: null,
           status: ProcessingStatus.PENDING,
+          category: null,
+          keywords: [],
+          language: Language.EN,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -165,15 +203,22 @@ describe('NewsProcessorService', () => {
         },
       ];
 
+      const mockMetadata = {
+        summary: 'This is a summary of article 2',
+        category: Category.TECHNOLOGY_INNOVATION,
+        language: Language.EN,
+        keywords: ['tech', 'test', 'article', 'two', 'keywords'],
+      };
+
       mockPrismaClient.article.findMany.mockResolvedValue(existingArticles);
-      mockAiService.generateSummary.mockResolvedValue(
-        'This is a summary of article 2',
-      );
+      mockAiService.generateMetadata.mockResolvedValue(mockMetadata);
 
-      await service.processNews(mockArticles);
+      const processPromise = service.processNews(mockArticles);
+      await jest.runAllTimersAsync();
+      await processPromise;
 
-      expect(mockAiService.generateSummary).toHaveBeenCalledTimes(1);
-      expect(mockAiService.generateSummary).toHaveBeenCalledWith(
+      expect(mockAiService.generateMetadata).toHaveBeenCalledTimes(1);
+      expect(mockAiService.generateMetadata).toHaveBeenCalledWith(
         mockArticles[1],
       );
 
@@ -181,14 +226,17 @@ describe('NewsProcessorService', () => {
         data: [
           {
             ...mockArticles[1],
-            summary: 'This is a summary of article 2',
+            summary: mockMetadata.summary,
+            category: mockMetadata.category,
+            language: mockMetadata.language,
+            keywords: mockMetadata.keywords,
             status: ProcessingStatus.COMPLETED,
           },
         ],
       });
     });
 
-    it('should handle articles with failed summary generation', async () => {
+    it('should handle articles with failed metadata generation', async () => {
       const mockArticles = [
         {
           id: '1',
@@ -201,21 +249,29 @@ describe('NewsProcessorService', () => {
           urlToImage: null,
           summary: null,
           status: ProcessingStatus.PENDING,
+          category: null,
+          keywords: [],
+          language: Language.EN,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
       ];
 
       mockPrismaClient.article.findMany.mockResolvedValue([]);
-      mockAiService.generateSummary.mockResolvedValue(undefined);
+      mockAiService.generateMetadata.mockResolvedValue(undefined);
 
-      await service.processNews(mockArticles);
+      const processPromise = service.processNews(mockArticles);
+      await jest.runAllTimersAsync();
+      await processPromise;
 
       expect(mockPrismaClient.article.createMany).toHaveBeenCalledWith({
         data: [
           {
             ...mockArticles[0],
             summary: null,
+            category: null,
+            language: Language.EN,
+            keywords: [],
             status: ProcessingStatus.FAILED,
           },
         ],
@@ -237,7 +293,7 @@ describe('NewsProcessorService', () => {
         },
       });
 
-      expect(mockAiService.generateSummary).not.toHaveBeenCalled();
+      expect(mockAiService.generateMetadata).not.toHaveBeenCalled();
       expect(mockPrismaClient.article.createMany).toHaveBeenCalledWith({
         data: [],
       });
@@ -256,6 +312,9 @@ describe('NewsProcessorService', () => {
           urlToImage: null,
           summary: null,
           status: ProcessingStatus.PENDING,
+          category: null,
+          keywords: [],
+          language: Language.EN,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -274,13 +333,13 @@ describe('NewsProcessorService', () => {
 
       await service.processNews(mockArticles);
 
-      expect(mockAiService.generateSummary).not.toHaveBeenCalled();
+      expect(mockAiService.generateMetadata).not.toHaveBeenCalled();
       expect(mockPrismaClient.article.createMany).toHaveBeenCalledWith({
         data: [],
       });
     });
 
-    it('should handle mixed success and failure in summary generation', async () => {
+    it('should handle mixed success and failure in metadata generation', async () => {
       const mockArticles = [
         {
           id: '1',
@@ -293,6 +352,9 @@ describe('NewsProcessorService', () => {
           urlToImage: null,
           summary: null,
           status: ProcessingStatus.PENDING,
+          category: null,
+          keywords: [],
+          language: Language.EN,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -307,28 +369,46 @@ describe('NewsProcessorService', () => {
           urlToImage: null,
           summary: null,
           status: ProcessingStatus.PENDING,
+          category: null,
+          keywords: [],
+          language: Language.EN,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
       ];
 
+      const mockMetadata = {
+        summary: 'Summary for article 1',
+        category: Category.TECHNOLOGY_INNOVATION,
+        language: Language.EN,
+        keywords: ['tech', 'test', 'article', 'one', 'keywords'],
+      };
+
       mockPrismaClient.article.findMany.mockResolvedValue([]);
-      mockAiService.generateSummary
-        .mockResolvedValueOnce('Summary for article 1')
+      mockAiService.generateMetadata
+        .mockResolvedValueOnce(mockMetadata)
         .mockResolvedValueOnce(undefined);
 
-      await service.processNews(mockArticles);
+      const processPromise = service.processNews(mockArticles);
+      await jest.runAllTimersAsync();
+      await processPromise;
 
       expect(mockPrismaClient.article.createMany).toHaveBeenCalledWith({
         data: [
           {
             ...mockArticles[0],
-            summary: 'Summary for article 1',
+            summary: mockMetadata.summary,
+            category: mockMetadata.category,
+            language: mockMetadata.language,
+            keywords: mockMetadata.keywords,
             status: ProcessingStatus.COMPLETED,
           },
           {
             ...mockArticles[1],
             summary: null,
+            category: null,
+            language: Language.EN,
+            keywords: [],
             status: ProcessingStatus.FAILED,
           },
         ],
@@ -348,15 +428,27 @@ describe('NewsProcessorService', () => {
           urlToImage: null,
           summary: null,
           status: ProcessingStatus.PENDING,
+          category: null,
+          keywords: [],
+          language: Language.EN,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
       ];
 
-      mockPrismaClient.article.findMany.mockResolvedValue([]);
-      mockAiService.generateSummary.mockResolvedValue('Test summary');
+      const mockMetadata = {
+        summary: 'Test summary',
+        category: Category.TECHNOLOGY_INNOVATION,
+        language: Language.EN,
+        keywords: ['test', 'article', 'keywords', 'example', 'mock'],
+      };
 
-      await service.processNews(mockArticles);
+      mockPrismaClient.article.findMany.mockResolvedValue([]);
+      mockAiService.generateMetadata.mockResolvedValue(mockMetadata);
+
+      const processPromise = service.processNews(mockArticles);
+      await jest.runAllTimersAsync();
+      await processPromise;
 
       expect(mockPrismaClient.article.findMany).toHaveBeenCalledWith({
         where: {
@@ -380,6 +472,9 @@ describe('NewsProcessorService', () => {
           urlToImage: null,
           summary: null,
           status: ProcessingStatus.PENDING,
+          category: null,
+          keywords: [],
+          language: Language.EN,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -394,6 +489,9 @@ describe('NewsProcessorService', () => {
           urlToImage: null,
           summary: null,
           status: ProcessingStatus.PENDING,
+          category: null,
+          keywords: [],
+          language: Language.EN,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -408,18 +506,38 @@ describe('NewsProcessorService', () => {
           urlToImage: null,
           summary: null,
           status: ProcessingStatus.PENDING,
+          category: null,
+          keywords: [],
+          language: Language.EN,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
       ];
 
       mockPrismaClient.article.findMany.mockResolvedValue([]);
-      mockAiService.generateSummary
-        .mockResolvedValueOnce('Summary 1')
-        .mockResolvedValueOnce('Summary 2')
-        .mockResolvedValueOnce('Summary 3');
+      mockAiService.generateMetadata
+        .mockResolvedValueOnce({
+          summary: 'Summary 1',
+          category: Category.TECHNOLOGY_INNOVATION,
+          language: Language.EN,
+          keywords: ['one', 'test', 'article', 'mock', 'keywords'],
+        })
+        .mockResolvedValueOnce({
+          summary: 'Summary 2',
+          category: Category.SOFTWARE_ENGINEERING_DEVELOPMENT,
+          language: Language.EN,
+          keywords: ['two', 'test', 'article', 'mock', 'keywords'],
+        })
+        .mockResolvedValueOnce({
+          summary: 'Summary 3',
+          category: Category.BUSINESS_FINANCE,
+          language: Language.EN,
+          keywords: ['three', 'test', 'article', 'mock', 'keywords'],
+        });
 
-      await service.processNews(mockArticles);
+      const processPromise = service.processNews(mockArticles);
+      await jest.runAllTimersAsync();
+      await processPromise;
 
       const createManyCalls = mockPrismaClient.article.createMany.mock
         .calls as unknown as [[{ data: Article[] }]];

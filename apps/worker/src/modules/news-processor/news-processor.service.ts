@@ -42,16 +42,19 @@ export class NewsProcessorService {
 
   private async summarizeArticle(article: Article, articlesToSave: Article[]) {
     try {
-      const summary = await this.aiService.generateSummary(article);
+      const metadata = await this.aiService.generateMetadata(article);
 
       articlesToSave.push({
         ...article,
-        summary: summary ?? null,
-        status: summary ? ProcessingStatus.COMPLETED : ProcessingStatus.FAILED,
+        summary: metadata?.summary ?? null,
+        category: metadata?.category ?? null,
+        language: metadata?.language ?? article.language,
+        keywords: metadata?.keywords ?? [],
+        status: metadata ? ProcessingStatus.COMPLETED : ProcessingStatus.FAILED,
       });
     } catch (error) {
       this.logger.error(
-        `Error generating summary for article ${article.url}:`,
+        `Error generating metadata for article ${article.url}:`,
         error,
       );
     }

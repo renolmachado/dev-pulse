@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AiService } from '../ai.service';
-import { Article, ProcessingStatus } from '@repo/database';
+import { AiService, ArticleMetadata } from '../ai.service';
+import { Article, ProcessingStatus, Category, Language } from '@repo/database';
 
 // Mock Groq SDK
 jest.mock('groq-sdk');
@@ -74,7 +74,7 @@ describe('AiService', () => {
     expect(service.groq).toBeDefined();
   });
 
-  describe('generateSummary', () => {
+  describe('generateMetadata', () => {
     const mockArticle: Article = {
       id: '1',
       url: 'https://example.com/article',
@@ -86,14 +86,23 @@ describe('AiService', () => {
       urlToImage: null,
       summary: null,
       status: ProcessingStatus.PENDING,
+      category: null,
+      keywords: [],
+      language: Language.EN,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    it('should generate a summary successfully with all content', async () => {
+    const mockMetadata: ArticleMetadata = {
+      summary: 'This is a test summary of the article.',
+      category: Category.TECHNOLOGY_INNOVATION,
+      language: Language.EN,
+      keywords: ['test', 'article', 'technology', 'innovation', 'software'],
+    };
+
+    it('should generate metadata successfully with all content', async () => {
       const mockHtml =
-        '<article><p>This is the full article content</p></article>';
-      const mockSummary = 'This is a test summary of the article.';
+        '<article><p>This is the full article content about technology and innovation</p></article>';
 
       // Mock fetch
       (global.fetch as jest.Mock).mockResolvedValue({
@@ -104,7 +113,8 @@ describe('AiService', () => {
       // Mock cheerio
       const cheerio = require('cheerio');
       cheerio.load = createCheerioMock({
-        article: 'This is the full article content',
+        article:
+          'This is the full article content about technology and innovation',
       });
 
       // Mock Groq API response
@@ -112,15 +122,15 @@ describe('AiService', () => {
         choices: [
           {
             message: {
-              content: mockSummary,
+              content: JSON.stringify(mockMetadata),
             },
           },
         ],
       });
 
-      const result = await service.generateSummary(mockArticle);
+      const result = await service.generateMetadata(mockArticle);
 
-      expect(result).toBe(mockSummary);
+      expect(result).toEqual(mockMetadata);
       expect(global.fetch).toHaveBeenCalledWith(mockArticle.url, {
         headers: {
           'User-Agent': expect.stringContaining('Mozilla/5.0'),
@@ -130,22 +140,21 @@ describe('AiService', () => {
         messages: [
           {
             role: 'system',
-            content: expect.stringContaining('professional content summarizer'),
+            content: expect.stringContaining('expert content analyzer'),
           },
           {
             role: 'user',
             content: expect.stringContaining('Test Article Title'),
           },
         ],
-        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-        temperature: 0.5,
+        model: 'llama-3.3-70b-versatile',
+        temperature: 0.2,
         max_completion_tokens: 500,
+        response_format: { type: 'json_object' },
       });
     });
 
     it('should handle fetch failure gracefully', async () => {
-      const mockSummary = 'Summary from available data only.';
-
       // Mock fetch failure
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: false,
@@ -157,22 +166,20 @@ describe('AiService', () => {
         choices: [
           {
             message: {
-              content: mockSummary,
+              content: JSON.stringify(mockMetadata),
             },
           },
         ],
       });
 
-      const result = await service.generateSummary(mockArticle);
+      const result = await service.generateMetadata(mockArticle);
 
-      expect(result).toBe(mockSummary);
+      expect(result).toEqual(mockMetadata);
       // Should still call Groq with available article data
       expect(mockGroqInstance.chat.completions.create).toHaveBeenCalled();
     });
 
     it('should handle fetch exception gracefully', async () => {
-      const mockSummary = 'Summary from available data only.';
-
       // Mock fetch throwing an error
       (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
 
@@ -181,15 +188,15 @@ describe('AiService', () => {
         choices: [
           {
             message: {
-              content: mockSummary,
+              content: JSON.stringify(mockMetadata),
             },
           },
         ],
       });
 
-      const result = await service.generateSummary(mockArticle);
+      const result = await service.generateMetadata(mockArticle);
 
-      expect(result).toBe(mockSummary);
+      expect(result).toEqual(mockMetadata);
       // Should still call Groq with available article data
       expect(mockGroqInstance.chat.completions.create).toHaveBeenCalled();
     });
@@ -206,6 +213,9 @@ describe('AiService', () => {
         urlToImage: null,
         summary: null,
         status: ProcessingStatus.PENDING,
+        category: null,
+        keywords: [],
+        language: Language.EN,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -219,7 +229,7 @@ describe('AiService', () => {
       const cheerio = require('cheerio');
       cheerio.load = createCheerioMock({});
 
-      const result = await service.generateSummary(articleWithoutContent);
+      const result = await service.generateMetadata(articleWithoutContent);
 
       expect(result).toBeUndefined();
       expect(mockGroqInstance.chat.completions.create).not.toHaveBeenCalled();
@@ -244,7 +254,7 @@ describe('AiService', () => {
         new Error('API rate limit exceeded'),
       );
 
-      const result = await service.generateSummary(mockArticle);
+      const result = await service.generateMetadata(mockArticle);
 
       expect(result).toBeUndefined();
     });
@@ -268,7 +278,7 @@ describe('AiService', () => {
         choices: [],
       });
 
-      const result = await service.generateSummary(mockArticle);
+      const result = await service.generateMetadata(mockArticle);
 
       expect(result).toBeUndefined();
     });
@@ -298,7 +308,111 @@ describe('AiService', () => {
         ],
       });
 
-      const result = await service.generateSummary(mockArticle);
+      const result = await service.generateMetadata(mockArticle);
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should validate metadata structure and return undefined for invalid data', async () => {
+      const mockHtml = '<article><p>Article content</p></article>';
+
+      // Mock fetch
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        text: jest.fn().mockResolvedValue(mockHtml),
+      });
+
+      const cheerio = require('cheerio');
+      cheerio.load = createCheerioMock({
+        article: 'Article content',
+      });
+
+      // Mock Groq API returning invalid metadata (missing fields)
+      mockGroqInstance.chat.completions.create.mockResolvedValue({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({ summary: 'Only summary' }),
+            },
+          },
+        ],
+      });
+
+      const result = await service.generateMetadata(mockArticle);
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should validate category enum and return undefined for invalid category', async () => {
+      const mockHtml = '<article><p>Article content</p></article>';
+
+      // Mock fetch
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        text: jest.fn().mockResolvedValue(mockHtml),
+      });
+
+      const cheerio = require('cheerio');
+      cheerio.load = createCheerioMock({
+        article: 'Article content',
+      });
+
+      // Mock Groq API returning invalid category
+      const invalidMetadata = {
+        summary: 'Test summary',
+        category: 'INVALID_CATEGORY',
+        language: Language.EN,
+        keywords: ['test', 'keywords', 'array', 'valid', 'five'],
+      };
+
+      mockGroqInstance.chat.completions.create.mockResolvedValue({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify(invalidMetadata),
+            },
+          },
+        ],
+      });
+
+      const result = await service.generateMetadata(mockArticle);
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should validate language enum and return undefined for invalid language', async () => {
+      const mockHtml = '<article><p>Article content</p></article>';
+
+      // Mock fetch
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        text: jest.fn().mockResolvedValue(mockHtml),
+      });
+
+      const cheerio = require('cheerio');
+      cheerio.load = createCheerioMock({
+        article: 'Article content',
+      });
+
+      // Mock Groq API returning invalid language
+      const invalidMetadata = {
+        summary: 'Test summary',
+        category: Category.TECHNOLOGY_INNOVATION,
+        language: 'INVALID_LANGUAGE',
+        keywords: ['test', 'keywords', 'array', 'valid', 'five'],
+      };
+
+      mockGroqInstance.chat.completions.create.mockResolvedValue({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify(invalidMetadata),
+            },
+          },
+        ],
+      });
+
+      const result = await service.generateMetadata(mockArticle);
 
       expect(result).toBeUndefined();
     });
@@ -315,13 +429,13 @@ describe('AiService', () => {
         choices: [
           {
             message: {
-              content: 'Generated summary',
+              content: JSON.stringify(mockMetadata),
             },
           },
         ],
       });
 
-      await service.generateSummary(mockArticle);
+      await service.generateMetadata(mockArticle);
 
       expect(mockGroqInstance.chat.completions.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -335,19 +449,11 @@ describe('AiService', () => {
       );
     });
 
-    it('should limit fetched content to 10000 characters', async () => {
-      const longContent = 'a'.repeat(15000);
-      const mockHtml = `<article><p>${longContent}</p></article>`;
-
-      // Mock fetch
+    it('should include available categories and languages in prompt', async () => {
+      // Mock fetch returning empty
       (global.fetch as jest.Mock).mockResolvedValue({
-        ok: true,
-        text: jest.fn().mockResolvedValue(mockHtml),
-      });
-
-      const cheerio = require('cheerio');
-      cheerio.load = createCheerioMock({
-        article: longContent,
+        ok: false,
+        status: 404,
       });
 
       // Mock Groq API response
@@ -355,58 +461,20 @@ describe('AiService', () => {
         choices: [
           {
             message: {
-              content: 'Summary of long content',
+              content: JSON.stringify(mockMetadata),
             },
           },
         ],
       });
 
-      const result = await service.generateSummary(mockArticle);
-
-      expect(result).toBe('Summary of long content');
-
-      // Verify the content passed to Groq is limited
-      const callArgs =
-        mockGroqInstance.chat.completions.create.mock.calls[0][0];
-      const userMessage = callArgs.messages.find((m: any) => m.role === 'user');
-      expect(userMessage.content.length).toBeLessThan(15000);
-    });
-
-    it('should combine multiple content sources correctly', async () => {
-      const mockHtml = '<article><p>Fetched content</p></article>';
-
-      // Mock fetch
-      (global.fetch as jest.Mock).mockResolvedValue({
-        ok: true,
-        text: jest.fn().mockResolvedValue(mockHtml),
-      });
-
-      const cheerio = require('cheerio');
-      cheerio.load = createCheerioMock({
-        article: 'Fetched content',
-      });
-
-      // Mock Groq API response
-      mockGroqInstance.chat.completions.create.mockResolvedValue({
-        choices: [
-          {
-            message: {
-              content: 'Combined summary',
-            },
-          },
-        ],
-      });
-
-      await service.generateSummary(mockArticle);
+      await service.generateMetadata(mockArticle);
 
       const callArgs =
         mockGroqInstance.chat.completions.create.mock.calls[0][0];
       const userMessage = callArgs.messages.find((m: any) => m.role === 'user');
 
-      // Verify all content sources are included
-      expect(userMessage.content).toContain('Title: Test Article Title');
-      expect(userMessage.content).toContain('Description: Test description');
-      expect(userMessage.content).toContain('Full Content: Fetched content');
+      expect(userMessage.content).toContain('TECHNOLOGY_INNOVATION');
+      expect(userMessage.content).toContain('EN, ES, PT');
     });
 
     it('should work with minimal article data', async () => {
@@ -421,6 +489,9 @@ describe('AiService', () => {
         urlToImage: null,
         summary: null,
         status: ProcessingStatus.PENDING,
+        category: null,
+        keywords: [],
+        language: Language.EN,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -436,15 +507,15 @@ describe('AiService', () => {
         choices: [
           {
             message: {
-              content: 'Summary from title only',
+              content: JSON.stringify(mockMetadata),
             },
           },
         ],
       });
 
-      const result = await service.generateSummary(minimalArticle);
+      const result = await service.generateMetadata(minimalArticle);
 
-      expect(result).toBe('Summary from title only');
+      expect(result).toEqual(mockMetadata);
       expect(mockGroqInstance.chat.completions.create).toHaveBeenCalled();
     });
   });

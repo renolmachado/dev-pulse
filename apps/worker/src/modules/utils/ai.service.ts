@@ -1,7 +1,14 @@
 import Groq from 'groq-sdk';
 import { Injectable, Logger } from '@nestjs/common';
-import { Article } from '@repo/database';
+import { Article, Category, Language } from '@repo/database';
 import * as cheerio from 'cheerio';
+
+export interface ArticleMetadata {
+  summary: string;
+  category: Category;
+  language: Language;
+  keywords: string[];
+}
 
 @Injectable()
 export class AiService {
@@ -77,9 +84,11 @@ export class AiService {
   }
 
   /**
-   * Generates a summary of an article using AI
+   * Generates structured metadata for an article using AI
    */
-  public async generateSummary(article: Article): Promise<string | undefined> {
+  public async generateMetadata(
+    article: Article,
+  ): Promise<ArticleMetadata | undefined> {
     try {
       // Fetch the full article content from the URL
       const fetchedContent = await this.fetchArticleContent(article.url);
@@ -116,37 +125,102 @@ export class AiService {
         return undefined;
       }
 
-      const contentToSummarize = contentParts.join('\n\n');
+      const contentToAnalyze = contentParts.join('\n\n');
 
-      const finalTokenCount = this.estimateTokens(contentToSummarize);
+      const finalTokenCount = this.estimateTokens(contentToAnalyze);
       this.logger.debug(
         `Content tokens for ${article.url}: ~${finalTokenCount} tokens`,
       );
+
+      const availableCategories = Object.values(Category).join(', ');
+      const availableLanguages = Object.values(Language).join(', ');
 
       const completion = await this.groq.chat.completions.create({
         messages: [
           {
             role: 'system',
             content:
-              'You are a professional content summarizer. Create concise, informative summaries that capture the key points and main ideas of articles. Keep summaries between 2-4 sentences. Return ONLY the summary text without any preamble, introduction, or phrases like "Here is a summary" or "This article discusses". Start directly with the summary content.',
+              'You are an expert content analyzer. Analyze articles and provide structured metadata in valid JSON format. Return ONLY valid JSON, no other text or explanation.',
           },
           {
             role: 'user',
-            content: `Summarize the following article:\n\n${contentToSummarize}`,
+            content: `Analyze the following article and provide structured metadata.
+
+Article URL: ${article.url}
+
+${contentToAnalyze}
+
+Provide the analysis in valid JSON format with these exact fields:
+{
+  "summary": "informative summaries that capture the key points and main ideas of articles. Keep summaries between 2-4 sentences. Return ONLY the summary text without any preamble, introduction, or phrases like "Here is a summary" or "This article discusses". Start directly with the summary content.",
+  "category": "One of: ${availableCategories}",
+  "language": "One of: ${availableLanguages}",
+  "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"]
+}
+
+Rules:
+- summary: 2-4 sentences, no preamble
+- category: Must match exactly one of the available categories
+- language: Must match exactly one of the available languages (EN, ES, or PT)
+- keywords: Array of exactly 5 relevant keywords
+- Return ONLY valid JSON, no other text
+
+JSON:`,
           },
         ],
-        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        model: 'llama-3.3-70b-versatile',
         temperature: 0.2,
         max_completion_tokens: 500,
+        response_format: { type: 'json_object' },
       });
 
-      const summary = completion.choices[0]?.message?.content || undefined;
+      const responseContent = completion.choices[0]?.message?.content;
 
-      this.logger.log(`Generated summary for article: ${article.url}`);
-      return summary;
+      if (!responseContent) {
+        this.logger.warn(
+          `No response content from AI for article: ${article.url}`,
+        );
+        return undefined;
+      }
+
+      const metadata = JSON.parse(responseContent) as ArticleMetadata;
+
+      // Validate the metadata structure
+      if (
+        !metadata.summary ||
+        !metadata.category ||
+        !metadata.language ||
+        !Array.isArray(metadata.keywords)
+      ) {
+        this.logger.error(
+          `Invalid metadata structure for article ${article.url}:`,
+          metadata,
+        );
+        return undefined;
+      }
+
+      // Validate category and language enums
+      if (!Object.values(Category).includes(metadata.category as Category)) {
+        this.logger.error(
+          `Invalid category for article ${article.url}:`,
+          metadata.category,
+        );
+        return undefined;
+      }
+
+      if (!Object.values(Language).includes(metadata.language as Language)) {
+        this.logger.error(
+          `Invalid language for article ${article.url}:`,
+          metadata.language,
+        );
+        return undefined;
+      }
+
+      this.logger.log(`Generated metadata for article: ${article.url}`);
+      return metadata;
     } catch (error) {
       this.logger.error(
-        `Error generating summary for article ${article.url}:`,
+        `Error generating metadata for article ${article.url}:`,
         error,
       );
     }

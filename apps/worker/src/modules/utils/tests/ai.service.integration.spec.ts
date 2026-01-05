@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AiService } from '../ai.service';
-import { Article, ProcessingStatus } from '@repo/database';
+import { Article, ProcessingStatus, Category, Language } from '@repo/database';
 
 /**
  * Integration tests for AiService
@@ -41,9 +41,9 @@ describe('AiService Integration Tests', () => {
     return test;
   };
 
-  describe('generateSummary - Real API Calls', () => {
+  describe('generateMetadata - Real API Calls', () => {
     skipIfNoApiKey()(
-      'should generate a summary for a real article with full content',
+      'should generate metadata for a real article with full content',
       async () => {
         // Use a stable, public article for testing
         const testArticle: Article = {
@@ -59,19 +59,28 @@ describe('AiService Integration Tests', () => {
           urlToImage: null,
           summary: null,
           status: ProcessingStatus.PENDING,
+          category: null,
+          keywords: [],
+          language: Language.EN,
           createdAt: new Date(),
           updatedAt: new Date(),
         };
 
-        const summary = await service.generateSummary(testArticle);
+        const metadata = await service.generateMetadata(testArticle);
 
-        // Verify the summary was generated
-        expect(summary).toBeDefined();
-        expect(typeof summary).toBe('string');
-        expect(summary!.length).toBeGreaterThan(0);
-        expect(summary).not.toBe('Error generating summary.');
+        // Verify the metadata was generated
+        expect(metadata).toBeDefined();
+        expect(metadata!.summary).toBeDefined();
+        expect(typeof metadata!.summary).toBe('string');
+        expect(metadata!.summary.length).toBeGreaterThan(0);
+        expect(metadata!.category).toBeDefined();
+        expect(Object.values(Category)).toContain(metadata!.category);
+        expect(metadata!.language).toBeDefined();
+        expect(Object.values(Language)).toContain(metadata!.language);
+        expect(metadata!.keywords).toBeDefined();
+        expect(Array.isArray(metadata!.keywords)).toBe(true);
 
-        console.log('Generated summary:', summary);
+        console.log('Generated metadata:', metadata);
       },
       30000, // 30 second timeout for API call
     );
@@ -91,24 +100,30 @@ describe('AiService Integration Tests', () => {
           urlToImage: null,
           summary: null,
           status: ProcessingStatus.PENDING,
+          category: null,
+          keywords: [],
+          language: Language.EN,
           createdAt: new Date(),
           updatedAt: new Date(),
         };
 
-        const summary = await service.generateSummary(testArticle);
+        const metadata = await service.generateMetadata(testArticle);
 
-        // Should still generate a summary from available data
-        expect(summary).toBeDefined();
-        expect(typeof summary).toBe('string');
-        expect(summary!.length).toBeGreaterThan(0);
+        // Should still generate metadata from available data
+        expect(metadata).toBeDefined();
+        expect(typeof metadata!.summary).toBe('string');
+        expect(metadata!.summary.length).toBeGreaterThan(0);
+        expect(metadata!.category).toBeDefined();
+        expect(metadata!.language).toBeDefined();
+        expect(metadata!.keywords).toBeDefined();
 
-        console.log('Generated summary from title/description:', summary);
+        console.log('Generated metadata from title/description:', metadata);
       },
       30000,
     );
 
     skipIfNoApiKey()(
-      'should fetch and summarize content from a real accessible URL',
+      'should fetch and generate metadata from a real accessible URL',
       async () => {
         // Using a stable, public URL
         const testArticle: Article = {
@@ -122,17 +137,23 @@ describe('AiService Integration Tests', () => {
           urlToImage: null,
           summary: null,
           status: ProcessingStatus.PENDING,
+          category: null,
+          keywords: [],
+          language: Language.EN,
           createdAt: new Date(),
           updatedAt: new Date(),
         };
 
-        const summary = await service.generateSummary(testArticle);
+        const metadata = await service.generateMetadata(testArticle);
 
-        expect(summary).toBeDefined();
-        expect(typeof summary).toBe('string');
-        expect(summary!.length).toBeGreaterThan(0);
+        expect(metadata).toBeDefined();
+        expect(typeof metadata!.summary).toBe('string');
+        expect(metadata!.summary.length).toBeGreaterThan(0);
+        expect(metadata!.category).toBeDefined();
+        expect(metadata!.language).toBeDefined();
+        expect(metadata!.keywords).toBeDefined();
 
-        console.log('Generated summary from fetched content:', summary);
+        console.log('Generated metadata from fetched content:', metadata);
       },
       45000, // Longer timeout for fetch + API call
     );
@@ -152,6 +173,9 @@ describe('AiService Integration Tests', () => {
             urlToImage: null,
             summary: null,
             status: ProcessingStatus.PENDING,
+            category: null,
+            keywords: [],
+            language: Language.EN,
             createdAt: new Date(),
             updatedAt: new Date(),
           },
@@ -166,21 +190,27 @@ describe('AiService Integration Tests', () => {
             urlToImage: null,
             summary: null,
             status: ProcessingStatus.PENDING,
+            category: null,
+            keywords: [],
+            language: Language.EN,
             createdAt: new Date(),
             updatedAt: new Date(),
           },
         ];
 
-        const summaries = await Promise.all(
-          articles.map((article) => service.generateSummary(article)),
+        const metadataResults = await Promise.all(
+          articles.map((article) => service.generateMetadata(article)),
         );
 
-        expect(summaries).toHaveLength(2);
-        summaries.forEach((summary, index) => {
-          expect(summary).toBeDefined();
-          expect(typeof summary).toBe('string');
-          expect(summary!.length).toBeGreaterThan(0);
-          console.log(`Summary ${index + 1}:`, summary);
+        expect(metadataResults).toHaveLength(2);
+        metadataResults.forEach((metadata, index) => {
+          expect(metadata).toBeDefined();
+          expect(typeof metadata!.summary).toBe('string');
+          expect(metadata!.summary.length).toBeGreaterThan(0);
+          expect(metadata!.category).toBeDefined();
+          expect(metadata!.language).toBeDefined();
+          expect(metadata!.keywords).toBeDefined();
+          console.log(`Metadata ${index + 1}:`, metadata);
         });
       },
       60000, // 60 seconds for multiple API calls
@@ -201,35 +231,38 @@ describe('AiService Integration Tests', () => {
           urlToImage: null,
           summary: null,
           status: ProcessingStatus.PENDING,
+          category: null,
+          keywords: [],
+          language: Language.EN,
           createdAt: new Date(),
           updatedAt: new Date(),
         }));
 
         // Process with small delays to avoid overwhelming the API
-        const summaries: (string | undefined)[] = [];
+        const metadataResults: (typeof service.generateMetadata extends (...args: any[]) => Promise<infer R> ? R : never)[] = [];
         for (const article of articles) {
-          const summary = await service.generateSummary(article);
-          summaries.push(summary);
+          const metadata = await service.generateMetadata(article);
+          metadataResults.push(metadata);
           // Small delay between requests
           await new Promise((resolve) => setTimeout(resolve, 500));
         }
 
         // All should complete, even if some fail
-        expect(summaries).toHaveLength(5);
-        const successfulSummaries = summaries.filter(
-          (s) => s && s !== 'Error generating summary.',
+        expect(metadataResults).toHaveLength(5);
+        const successfulMetadata = metadataResults.filter(
+          (m) => m && m.summary,
         );
-        expect(successfulSummaries.length).toBeGreaterThan(0);
+        expect(successfulMetadata.length).toBeGreaterThan(0);
 
         console.log(
-          `Successfully generated ${successfulSummaries.length}/5 summaries`,
+          `Successfully generated ${successfulMetadata.length}/5 metadata`,
         );
       },
       90000, // 90 seconds for multiple sequential calls
     );
 
     skipIfNoApiKey()(
-      'should produce different summaries for different content',
+      'should produce different metadata for different content',
       async () => {
         const article1: Article = {
           id: 'test-diff-1',
@@ -243,6 +276,9 @@ describe('AiService Integration Tests', () => {
           urlToImage: null,
           summary: null,
           status: ProcessingStatus.PENDING,
+          category: null,
+          keywords: [],
+          language: Language.EN,
           createdAt: new Date(),
           updatedAt: new Date(),
         };
@@ -259,29 +295,33 @@ describe('AiService Integration Tests', () => {
           urlToImage: null,
           summary: null,
           status: ProcessingStatus.PENDING,
+          category: null,
+          keywords: [],
+          language: Language.EN,
           createdAt: new Date(),
           updatedAt: new Date(),
         };
 
-        const [summary1, summary2] = await Promise.all([
-          service.generateSummary(article1),
-          service.generateSummary(article2),
+        const [metadata1, metadata2] = await Promise.all([
+          service.generateMetadata(article1),
+          service.generateMetadata(article2),
         ]);
 
-        expect(summary1).toBeDefined();
-        expect(summary2).toBeDefined();
+        expect(metadata1).toBeDefined();
+        expect(metadata2).toBeDefined();
 
         // Summaries should be different for different content
-        expect(summary1).not.toBe(summary2);
-
-        console.log('Summary 1 (ML):', summary1);
-        console.log('Summary 2 (Cooking):', summary2);
+        expect(metadata1!.summary).not.toBe(metadata2!.summary);
+        // Categories might be different too
+        
+        console.log('Metadata 1 (ML):', metadata1);
+        console.log('Metadata 2 (Cooking):', metadata2);
       },
       45000,
     );
 
     skipIfNoApiKey()(
-      'should verify summary quality and length constraints',
+      'should verify metadata quality and length constraints',
       async () => {
         const testArticle: Article = {
           id: 'test-quality',
@@ -296,27 +336,33 @@ describe('AiService Integration Tests', () => {
           urlToImage: null,
           summary: null,
           status: ProcessingStatus.PENDING,
+          category: null,
+          keywords: [],
+          language: Language.EN,
           createdAt: new Date(),
           updatedAt: new Date(),
         };
 
-        const summary = await service.generateSummary(testArticle);
+        const metadata = await service.generateMetadata(testArticle);
 
-        expect(summary).toBeDefined();
-        expect(typeof summary).toBe('string');
+        expect(metadata).toBeDefined();
+        expect(typeof metadata!.summary).toBe('string');
 
         // Verify summary meets quality expectations
-        const summaryLength = summary!.length;
+        const summaryLength = metadata!.summary.length;
         expect(summaryLength).toBeGreaterThan(50); // At least a meaningful sentence
         expect(summaryLength).toBeLessThan(1000); // Not too long (should be 2-4 sentences)
 
-        // Should not be just the error message
-        expect(summary).not.toBe('Error generating summary.');
-
         // Should contain actual content, not just empty strings
-        expect(summary!.trim().length).toBeGreaterThan(0);
+        expect(metadata!.summary.trim().length).toBeGreaterThan(0);
 
-        console.log('Quality summary:', summary);
+        // Verify other fields
+        expect(metadata!.category).toBeDefined();
+        expect(metadata!.language).toBeDefined();
+        expect(Array.isArray(metadata!.keywords)).toBe(true);
+        expect(metadata!.keywords.length).toBeGreaterThan(0);
+
+        console.log('Quality metadata:', metadata);
         console.log('Summary length:', summaryLength);
       },
       30000,
@@ -338,15 +384,19 @@ describe('AiService Integration Tests', () => {
           urlToImage: null,
           summary: null,
           status: ProcessingStatus.PENDING,
+          category: null,
+          keywords: [],
+          language: Language.EN,
           createdAt: new Date(),
           updatedAt: new Date(),
         };
 
-        const summary = await service.generateSummary(testArticle);
+        const metadata = await service.generateMetadata(testArticle);
 
-        // Should still generate a summary from available data
-        expect(summary).toBeDefined();
-        expect(typeof summary).toBe('string');
+        // Should still generate metadata from available data
+        expect(metadata).toBeDefined();
+        expect(typeof metadata!.summary).toBe('string');
+        expect(metadata!.category).toBeDefined();
       },
       30000,
     );
@@ -365,22 +415,25 @@ describe('AiService Integration Tests', () => {
           urlToImage: null,
           summary: null,
           status: ProcessingStatus.PENDING,
+          category: null,
+          keywords: [],
+          language: Language.EN,
           createdAt: new Date(),
           updatedAt: new Date(),
         };
 
         const startTime = Date.now();
-        const summary = await service.generateSummary(testArticle);
+        const metadata = await service.generateMetadata(testArticle);
         const duration = Date.now() - startTime;
 
-        expect(summary).toBeDefined();
-        expect(typeof summary).toBe('string');
+        expect(metadata).toBeDefined();
+        expect(typeof metadata!.summary).toBe('string');
 
         // Should not wait forever - fetch should timeout reasonably
         expect(duration).toBeLessThan(30000); // 30 seconds max
 
         console.log(`Request completed in ${duration}ms`);
-        console.log('Summary:', summary);
+        console.log('Metadata:', metadata);
       },
       45000,
     );
@@ -397,7 +450,7 @@ describe('AiService Integration Tests', () => {
       'should use the correct model and parameters',
       async () => {
         // This test verifies the configuration indirectly by ensuring
-        // the service can successfully generate summaries
+        // the service can successfully generate metadata
         const testArticle: Article = {
           id: 'test-config',
           url: 'https://example.com',
@@ -409,17 +462,23 @@ describe('AiService Integration Tests', () => {
           urlToImage: null,
           summary: null,
           status: ProcessingStatus.PENDING,
+          category: null,
+          keywords: [],
+          language: Language.EN,
           createdAt: new Date(),
           updatedAt: new Date(),
         };
 
-        const summary = await service.generateSummary(testArticle);
+        const metadata = await service.generateMetadata(testArticle);
 
-        expect(summary).toBeDefined();
-        expect(summary).not.toBe('Error generating summary.');
+        expect(metadata).toBeDefined();
+        expect(metadata!.summary).toBeDefined();
+        expect(metadata!.category).toBeDefined();
+        expect(metadata!.language).toBeDefined();
+        expect(metadata!.keywords).toBeDefined();
 
-        // If we get a valid summary, it means the model and parameters are correctly configured
-        console.log('Service is properly configured, generated:', summary);
+        // If we get valid metadata, it means the model and parameters are correctly configured
+        console.log('Service is properly configured, generated:', metadata);
       },
       30000,
     );

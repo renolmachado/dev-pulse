@@ -1,11 +1,16 @@
 import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
-import type { Article, Prisma, Category, Language } from '@prisma/client';
+import type { Article, Prisma } from '@prisma/client';
+import { Category, Language } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
 
 // Re-export Prisma types
-export type { Article, PrismaClient, Prisma, Category, Language };
+export type { Article, Prisma };
+
+// Re-export enums as both types and values
+export { Category, Language };
+export type { Category as CategoryType, Language as LanguageType };
 
 // Manually define and export ProcessingStatus enum
 // This matches the enum defined in the Prisma schema
@@ -13,7 +18,7 @@ export const ProcessingStatus = {
   PENDING: 'PENDING',
   PROCESSING: 'PROCESSING',
   COMPLETED: 'COMPLETED',
-  FAILED: 'FAILED'
+  FAILED: 'FAILED',
 } as const;
 
 export type ProcessingStatus = (typeof ProcessingStatus)[keyof typeof ProcessingStatus];
