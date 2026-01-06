@@ -22,14 +22,6 @@ export const metadata: Metadata = {
     description: 'Stay updated with the latest news, curated and summarized for you.',
     url: 'https://dev-pulse-web-gules.vercel.app/',
     siteName: 'News Pulse',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'News Pulse - Your Daily News Feed',
-      },
-    ],
     locale: 'en_US',
     type: 'website',
   },
@@ -37,7 +29,6 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'News Pulse - Your Daily News Feed',
     description: 'Stay updated with the latest news, curated and summarized for you.',
-    images: ['/og-image.png'],
   },
 };
 
