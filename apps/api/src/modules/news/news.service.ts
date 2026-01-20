@@ -30,7 +30,7 @@ export class NewsService {
     @InjectQueue('news-processing') private newsQueue: Queue,
   ) {}
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_12_HOURS)
   async fetchNews() {
     try {
       this.logger.log('Fetching news...');
