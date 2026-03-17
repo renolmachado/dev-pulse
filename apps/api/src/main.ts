@@ -12,6 +12,11 @@ async function bootstrap() {
     methods: ['GET'],
   });
 
-  await app.listen(process.env.PORT ?? 8001);
+  const host = process.env.HOST ?? '0.0.0.0';
+  const port = process.env.PORT ?? 8001;
+
+  await app.listen(port, host, () => {
+    console.log(`Server is running on ${host}:${port}`);
+  });
 }
 bootstrap();
