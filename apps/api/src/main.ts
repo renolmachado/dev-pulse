@@ -16,7 +16,7 @@ async function bootstrap() {
   const port = process.env.PORT ?? 8001;
 
   await app.listen(port, host, () => {
-    console.log(`********** Server is running on ${host}:${port} **********`);
+    console.log(`********* Server is running on ${host}:${port} *********`);
     console.log(`Database URL: ${process.env.DATABASE_URL}`);
     console.log(`Redis URL: ${process.env.REDIS_URL}`);
   });
